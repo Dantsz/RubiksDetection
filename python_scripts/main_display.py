@@ -15,14 +15,16 @@ for filename in os.listdir("images"):
 images = [cv.resize(img, (800, 600)) for img in images]
 images_1 = np.vstack(images)
 # Apply filter to all images
-images_filtered = [filtering.adaptive_amax_filtre(img) for img in images]
+images_filtered = [filtering.amax_filter(img) for img in images]
 #Convert images to BGR
 images_filtered = [cv.cvtColor(img, cv.COLOR_GRAY2BGR) for img in images_filtered]
 images_2 = np.vstack(images_filtered)
 # merge images_1 with images_2 and resize to 800x600
-result = np.hstack((images_1, images_2))
-result = cv.resize(result, (800, 600))
+images_gray = [cv.cvtColor(cv.cvtColor(img, cv.COLOR_BGR2GRAY),cv.COLOR_GRAY2BGR) for img in images]
+images_3 = np.vstack(images_gray)
 
+result = np.hstack((images_1, images_2, images_3))
+result = cv.resize(result, (800, 600))
 cv.imshow("Concatenated Image", result)
 cv.waitKey(0)
 cv.destroyAllWindows()
