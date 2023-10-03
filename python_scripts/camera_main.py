@@ -20,27 +20,28 @@ while True:
     img_1 = filtering.adaptive_amax_filter(img)
     img_2 = filtering.adaptive_high_pass_filter(img)
 
-    img_3 = filtering.high_pass_grayscale_filter(img)
+    img_3 = filtering.canny_convert_filter(img)
+    img_4 = filtering.canny_convert_filter(img)
 
-    images = np.hstack((img_1, img_2))
+    images = np.vstack((np.hstack((img_1, img_2)),np.hstack((img_3, img_4))))
     images= cv.resize(images, (1920, 600))
 
     # Display the image
 
-    # # Invert the image
-    # img = cv.bitwise_not(img)
-    # # Apply Hough transform on the detected edges to detect lines
-    # lines = cv.HoughLinesP(img, rho=1, theta=np.pi/180, threshold=25, minLineLength=75, maxLineGap=10)
-    # # Convert the image to RGB
-    # img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
-    # # Draw the detected lines on the original image
-    # print(f"Number of lines detected: {len(lines)}")
-    # for line in lines:
-    #     x1, y1, x2, y2 = line[0]
-    #     # cv.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
+    # Invert the image
+    img_1 = cv.bitwise_not(img_1)
+    # Apply Hough transform on the detected edges to detect lines
+    lines = cv.HoughLinesP(img_1, rho=1, theta=np.pi/180, threshold=80, minLineLength=75, maxLineGap=2)
+    # Convert the image to RGB
+    img_1 = cv.cvtColor(img_1, cv.COLOR_GRAY2BGR)
+    # Draw the detected lines on the original image
+    print(f"Number of lines detected: {len(lines)}")
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        cv.line(img_1, (x1, y1), (x2, y2), (0, 0, 255), 2)
     # # Resize and display the image
     cv.imshow('Image', images)
+    cv.imshow('Lines', img_1)
     if cv.waitKey(1) == ord('q'):
         break
 # When everything done, release the capture

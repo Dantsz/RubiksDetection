@@ -36,3 +36,18 @@ def high_pass_grayscale_filter(img: cv.Mat) -> cv.Mat:
     # Convert back to uint8
     laplacian = np.uint8(np.absolute(laplacian))
     return laplacian
+
+
+def canny_convert_filter(img: cv.Mat) -> cv.Mat:
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    gray = cv.GaussianBlur(gray, (5, 5), 0)
+    edges = cv.Canny(gray, 100, 200)
+    return edges
+
+def canny_amax_filter(img: cv.Mat) -> cv.Mat:
+    gray =  np.amax(img, axis=2)
+    gray = cv.medianBlur(gray, 11)
+    edges = cv.Canny(gray, 100, 200)
+    return edges
+
+
