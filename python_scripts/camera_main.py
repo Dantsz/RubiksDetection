@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import filtering
+import features
 
 cap = cv.VideoCapture(0)
 if not cap.isOpened():
@@ -26,12 +27,10 @@ while True:
     images = np.vstack((np.hstack((img_1, img_2)),np.hstack((img_3, img_4))))
     images= cv.resize(images, (1920, 600))
 
-    # Display the image
-
     # Invert the image
     img_1 = cv.bitwise_not(img_1)
     # Apply Hough transform on the detected edges to detect lines
-    lines = cv.HoughLinesP(img_1, rho=1, theta=np.pi/180, threshold=30, minLineLength=50, maxLineGap=2)
+    lines = features.extract_lines_houghP(img_1)
     # Convert the image to RGB
     img_1 = cv.cvtColor(img_1, cv.COLOR_GRAY2BGR)
     # Draw the detected lines on the original image
@@ -39,7 +38,7 @@ while True:
     for line in lines:
         x1, y1, x2, y2 = line[0]
         cv.line(img_1, (x1, y1), (x2, y2), (0, 0, 255), 2)
-    # # Resize and display the image
+    # Resize and display the image
     cv.imshow('Image', images)
     cv.imshow('Lines', img_1)
     if cv.waitKey(1) == ord('q'):
