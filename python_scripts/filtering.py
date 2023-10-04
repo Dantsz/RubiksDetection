@@ -1,6 +1,12 @@
 import cv2 as cv
 import numpy as np
 
+# """
+# FUNCTIONS SHOULD HAVE THE SAME BEHAVIOR:
+# TRANFORM THE RGB INTO A BINARY IMAGE WHERE
+# THE CUBE SQUARES ARE WHITE AND CUBE LINES ARE BLACK
+# """
+
 def adaptive_amax_filter(img: cv.Mat) -> cv.Mat:
     gray = np.amax(img, axis=2)
     #blur
@@ -9,10 +15,10 @@ def adaptive_amax_filter(img: cv.Mat) -> cv.Mat:
     # Do adaptive thesholding
     thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)
     #Do close
-    close_kernel = np.ones((5, 5), np.uint8)
+    close_kernel = np.ones((7,7), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
     #Do opening
-    kernel = np.ones((5, 5), np.uint8)
+    kernel = np.ones((11, 11), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     return thresh
 
