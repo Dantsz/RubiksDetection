@@ -31,7 +31,7 @@ while True:
     # Invert the image
     img_1 = cv.bitwise_not(img_1)
     # Apply Hough transform on the detected edges to detect lines
-    lines = cv.HoughLinesP(img_1, rho=1, theta=np.pi/180, threshold=80, minLineLength=75, maxLineGap=2)
+    lines = cv.HoughLinesP(img_1, rho=1, theta=np.pi/180, threshold=30, minLineLength=100, maxLineGap=2)
     # Convert the image to RGB
     img_1 = cv.cvtColor(img_1, cv.COLOR_GRAY2BGR)
     # Draw the detected lines on the original image
