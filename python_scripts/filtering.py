@@ -12,7 +12,7 @@ def adaptive_amax_filter(img: cv.Mat) -> cv.Mat:
     close_kernel = np.ones((5, 5), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
     #Do opening
-    kernel = np.ones((11, 11), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     return thresh
 
