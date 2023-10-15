@@ -18,7 +18,7 @@ def adaptive_amax_filter(img: cv.Mat) -> cv.Mat:
     close_kernel = np.ones((7,7), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
     #Do opening
-    kernel = np.ones((11, 11), np.uint8)
+    kernel = np.ones((7, 7), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     return thresh
 
@@ -59,4 +59,26 @@ def canny_amax_filter(img: cv.Mat) -> cv.Mat:
     edges = cv.Canny(gray, 100, 200)
     return edges
 
+def sobel_amax_filter(img: cv.Mat) -> cv.Mat:
+    gray = np.amax(img, axis=2)
+    #blur
+    gray = cv.GaussianBlur(gray, (15, 15), 0)
+    # Apply Sobel filter
+    sobelx = cv.Sobel(gray, cv.CV_64F, 1, 0, ksize=5)
+    sobely = cv.Sobel(gray, cv.CV_64F, 0, 1, ksize=5)
+    sobel = cv.addWeighted(sobelx, 0.5, sobely, 0.5, 0)
+    # Convert back to uint8
+    sobel = np.uint8(np.absolute(sobel))
+    return sobel
 
+def sobel_grayscale_filter(img: cv.Mat) -> cv.Mat:
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    #blur
+    gray = cv.GaussianBlur(gray, (15, 15), 0)
+    # Apply Sobel filter
+    sobelx = cv.Sobel(gray, cv.CV_64F, 1, 0, ksize=5)
+    sobely = cv.Sobel(gray, cv.CV_64F, 0, 1, ksize=5)
+    sobel = cv.addWeighted(sobelx, 0.5, sobely, 0.5, 0)
+    # Convert back to uint8
+    sobel = np.uint8(np.absolute(sobel))
+    return sobel

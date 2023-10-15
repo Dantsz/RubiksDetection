@@ -23,7 +23,7 @@ while True:
     img_2 = filtering.adaptive_high_pass_filter(img)
 
     img_3 = filtering.canny_convert_filter(img)
-    img_4 = filtering.canny_convert_filter(img)
+    img_4 = filtering.sobel_grayscale_filter(img)
 
     images = np.vstack((np.hstack((img_1, img_2)),np.hstack((img_3, img_4))))
     images= cv.resize(images, (1920, 600))
@@ -32,7 +32,8 @@ while True:
     img_1 = cv.bitwise_not(img_1)
     # Apply Hough transform on the detected edges to detect lines
     lines = features.extract_lines_houghP(img_1)
-    lined = debug.display_lines(img_1, lines)
+    lines = features.filter_perpendicular_lines(lines)
+    lined = debug.display_lines_houghP(img_1, lines)
     # Resize and display the image
     cv.imshow('Image', images)
     cv.imshow('Lines', lined)
