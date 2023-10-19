@@ -17,7 +17,7 @@ while True:
         break
     # Load an image
     img = frame
-    img = cv.resize(img, (800, 600))
+    img = cv.resize(img, (400, 300))
 
     img_1 = filtering.adaptive_amax_filter(img)
     img_2 = filtering.adaptive_high_pass_filter(img)
@@ -34,6 +34,7 @@ while True:
     lines = features.extract_lines_houghP(img_1)
     lines = features.filter_perpendicular_lines(lines)
     lined = debug.display_lines_houghP(img_1, lines)
+    lined = cv.resize(lined,(800,600))
     # Resize and display the image
     cv.imshow('Image', images)
     cv.imshow('Lines', lined)
