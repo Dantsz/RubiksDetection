@@ -5,7 +5,8 @@ def extract_lines_houghP(img: cv.Mat) -> [cv.typing.MatLike]:
     lines = cv.HoughLinesP(img, 1, np.pi/180, threshold=50, minLineLength=100, maxLineGap=5)
     return lines if lines is not None else []
 
-def filter_perpendicular_lines(lines: np.ndarray) -> np.ndarray:
+# Return list of pair of lines that are perpendicular
+def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
     # Filter lines by slope
     filtered_lines = []
     # iterate over pairs of lines
@@ -32,6 +33,30 @@ def filter_perpendicular_lines(lines: np.ndarray) -> np.ndarray:
             #Convert to degrees
             angle = np.degrees(angle)
             if angle in range(80, 100):
-                filtered_lines.append(lines[i])
-                filtered_lines.append(lines[j])
+                filtered_lines.append((lines[i][0],lines[j][0]))
     return filtered_lines
+
+def find_intersection_points(lines) -> [np.ndarray]:
+    intersection_points = []
+    for i in range(len(lines)):
+            (p1, p2, p3, p4), (q1, q2, q3, q4) = lines[i]
+            A = np.array([
+                [p3 - p1, -(q3 - q1)],
+                [p4 - p2, -(q4 - q2)]
+            ])
+            B = np.array([q1 - p1, q2 - p2])
+            # Solve the linear system
+            try:
+                t = np.linalg.solve(A, B)
+            except np.linalg.LinAlgError:
+                continue  # Lines are parallel, no intersection
+
+            # Check if the intersection point is within the line segments
+            if 0 <= t[0] <= 1 and 0 <= t[1] <= 1:
+                point1 = np.array((p1,p2))
+                point2 = np.array((p3,p4))
+                intersection_point = point1 + t[0] * (point2 - point1)
+                intersection_points.append(intersection_point)
+            else:
+                intersection_points.append(None)
+    return intersection_points
