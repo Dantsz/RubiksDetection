@@ -14,6 +14,5 @@ def display_lines_houghP(img: cv.Mat,lines) -> cv.Mat:
 def display_intersection_points(img: cv.Mat, intersection_points: [np.ndarray]) -> cv.Mat:
     for point in intersection_points:
         if point is not None:
-            print(point)
             cv.circle(img, tuple([int(point[0]),int(point[1])]), 5, (0, 255, 0), -1)
     return img
