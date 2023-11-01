@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 def extract_lines_houghP(img: cv.Mat) -> [cv.typing.MatLike]:
-    lines = cv.HoughLinesP(img, 0.75, np.pi/180, threshold=50, minLineLength=100, maxLineGap=5)
+    lines = cv.HoughLinesP(img, 0.5, np.pi/90, threshold=50, minLineLength=100, maxLineGap=5)
     return lines if lines is not None else []
 
 # Return list of pair of lines that are perpendicular
