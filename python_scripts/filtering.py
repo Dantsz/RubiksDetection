@@ -10,15 +10,15 @@ import numpy as np
 def adaptive_amax_filter(img: cv.Mat) -> cv.Mat:
     gray = np.amax(img, axis=2)
     #blur
-    gray = cv.GaussianBlur(gray, (11, 11), 0)
-    gray = cv.medianBlur(gray, 11)
+    gray = cv.GaussianBlur(gray, (7, 7), 0)
+    gray = cv.medianBlur(gray, 7)
     # Do adaptive thesholding
     thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)
     #Do close
-    close_kernel = np.ones((7,7), np.uint8)
+    close_kernel = np.ones((5,5), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
     #Do opening
-    kernel = np.ones((7, 7), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     return thresh
 
