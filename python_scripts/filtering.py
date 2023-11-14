@@ -55,8 +55,24 @@ def canny_convert_filter(img: cv.Mat) -> cv.Mat:
 
 def canny_amax_filter(img: cv.Mat) -> cv.Mat:
     gray =  np.amax(img, axis=2)
-    gray = cv.medianBlur(gray, 11)
+    gray = cv.GaussianBlur(gray, (5, 5), 0)
     edges = cv.Canny(gray, 100, 200)
+    return edges
+
+def canny_amax_adaptive_filter(img: cv.Mat) -> cv.Mat:
+    gray =  np.amax(img, axis=2)
+    gray = cv.GaussianBlur(gray, (11, 11), 0)
+    gray = cv.medianBlur(gray, 11)
+    # Do adaptive thesholding
+    thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)
+    #Do close
+    close_kernel = np.ones((3,3), np.uint8)
+    thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
+    #Do opening
+    kernel = np.ones((3, 3), np.uint8)
+    thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
+    thresh = cv.GaussianBlur(thresh, (11, 11), 0)
+    edges = cv.Canny(thresh, 100, 200)
     return edges
 
 def sobel_amax_filter(img: cv.Mat) -> cv.Mat:
