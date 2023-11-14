@@ -61,5 +61,14 @@ def find_intersection_points(lines) -> [np.ndarray]:
                 intersection_points.append(None)
     return intersection_points
 
-def point_merge(points : [(np.ndarray,np.ndarray)],lines : np.ndarray, distance) -> [np.ndarray]:
-    pass
+def point_merge(points : [(np.ndarray,np.ndarray)],lines : np.ndarray, distance: float) -> [(np.ndarray,np.ndarray)]:
+    assert len(points) == len(lines)
+    for i in range(len(points)):
+        if points[i] is None:
+            continue
+        for j in range(i+1, len(points)):
+            if points[j] is None:
+                continue
+            if np.linalg.norm(points[i]-points[j]) < distance:
+                points[j] = points[i]
+    return points
