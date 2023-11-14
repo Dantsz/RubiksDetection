@@ -36,7 +36,8 @@ def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
                 filtered_lines.append((lines[i][0],lines[j][0]))
     return filtered_lines
 
-def find_intersection_points(lines) -> [np.ndarray]:
+def find_intersection_points(lines:[(np.ndarray,np.ndarray)]) -> [np.ndarray]:
+    'FInds the intersection points of the two lines for each entry in the array, returns None if no intersection, the index of the entry matches the index of the intersection point'
     intersection_points = []
     for i in range(len(lines)):
             (p1, p2, p3, p4), (q1, q2, q3, q4) = lines[i]
@@ -61,7 +62,7 @@ def find_intersection_points(lines) -> [np.ndarray]:
                 intersection_points.append(None)
     return intersection_points
 
-def point_merge(points : [(np.ndarray,np.ndarray)],lines : np.ndarray, distance: float) -> [(np.ndarray,np.ndarray)]:
+def point_merge(points : [np.ndarray], lines : [(np.ndarray, np.ndarray)], distance: float) -> [np.ndarray]:
     assert len(points) == len(lines)
     for i in range(len(points)):
         if points[i] is None:
