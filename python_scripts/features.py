@@ -3,8 +3,10 @@ import numpy as np
 
 def extract_lines_houghP(img: cv.Mat) -> [cv.typing.MatLike]:
     lines = cv.HoughLinesP(img, 0.5, np.pi/180, threshold=50, minLineLength=100, maxLineGap=5)
+    if lines is None:
+        return []
     lines = [line[0] for line in lines]
-    return lines if lines is not None else []
+    return lines
 
 # Return list of pair of lines that are perpendicular
 def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
