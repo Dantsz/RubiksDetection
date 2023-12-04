@@ -3,6 +3,7 @@ import numpy as np
 
 def extract_lines_houghP(img: cv.Mat) -> [cv.typing.MatLike]:
     lines = cv.HoughLinesP(img, 0.5, np.pi/180, threshold=50, minLineLength=100, maxLineGap=5)
+    lines = [line[0] for line in lines]
     return lines if lines is not None else []
 
 # Return list of pair of lines that are perpendicular
@@ -13,8 +14,8 @@ def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
     for i in range(len(lines)):
         for j in range(i+1, len(lines)):
             # Get the coordinates of the lines
-            x1, y1, x2, y2 = lines[i][0]
-            x3, y3, x4, y4 = lines[j][0]
+            x1, y1, x2, y2 = lines[i]
+            x3, y3, x4, y4 = lines[j]
             #Calculate dot product of the two lines
             dot_product = (x2-x1)*(x4-x3)+(y2-y1)*(y4-y3)
             #Calculate the length of the lines
@@ -33,7 +34,7 @@ def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
             #Convert to degrees
             angle = np.degrees(angle)
             if angle in range(80, 100):
-                filtered_lines.append((lines[i][0],lines[j][0]))
+                filtered_lines.append((lines[i],lines[j]))
     return filtered_lines
 
 def find_intersection_points(lines:[(np.ndarray,np.ndarray)]) -> [np.ndarray]:
