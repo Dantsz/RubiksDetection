@@ -15,7 +15,7 @@ for filename in os.listdir("images"):
 images = [cv.resize(img, (800, 600)) for img in images]
 images_1 = np.vstack(images)
 # Apply filter to all images
-images_filtered = [filtering.amax_filter(img) for img in images]
+images_filtered = [filtering.adaptive_amax_filter(img) for img in images]
 #Convert images to BGR
 images_filtered = [cv.cvtColor(img, cv.COLOR_GRAY2BGR) for img in images_filtered]
 images_2 = np.vstack(images_filtered)
