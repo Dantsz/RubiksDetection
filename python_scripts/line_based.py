@@ -23,11 +23,8 @@ def process_frame(frame):
     img_1 = cv.bitwise_not(img_1)
     # Apply Hough transform on the detected edges to detect lines
     lines = features.extract_lines_houghP(img_1)
-    lines = features.filter_perpendicular_lines(lines)
-    lined = debug.display_lines_houghP(img_1, list(sum(lines,())))
-    intersection_points = features.find_intersection_points(lines)
-    intersection_points = features.point_merge(intersection_points,lines,10)
-    lined = debug.display_intersection_points(lined, intersection_points)
+    lined = debug.display_lines_houghP(img_1,lines)
+
     lined = cv.resize(lined,(800,600))
     # Resize and display the image
     cv.imshow('Image', images)
