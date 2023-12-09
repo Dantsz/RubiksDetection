@@ -7,6 +7,8 @@ import cv2 as cv
 import dearpygui.dearpygui as dpg
 
 
+ui_elements : dict = {
+}
 
 def process_frame(frame):
 
@@ -27,6 +29,7 @@ def process_frame(frame):
     img_1 = cv.bitwise_not(img_1)
     # Apply Hough transform on the detected edges to detect lines
     lines = features.extract_lines_houghP(img_1)
+    dpg.set_value(ui_elements["lines"], "Line count: " + str(len(lines)))
     lined = debug.display_lines_houghP(img_1,lines)
 
     lined = cv.resize(lined,(800,600))
@@ -38,12 +41,10 @@ def process_frame(frame):
        return
 
 dpg.create_context()
-dpg.create_viewport()
+dpg.create_viewport(width=600, height=600)
 dpg.setup_dearpygui()
-with dpg.window(label="Example Window"):
-        dpg.add_text("Hello world")
-        dpg.add_input_text(label="string")
-        dpg.add_slider_float(label="float")
+with dpg.window(label="Line detection", width=600, height=600, no_resize=True, no_move=True, no_collapse=True, no_close=True):
+        ui_elements['lines'] = dpg.add_text("Line count: ")
 
 dpg.show_viewport()
 camera = camera_main.camera_main_coroutine(process_frame)
