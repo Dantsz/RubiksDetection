@@ -34,8 +34,8 @@ def process_frame(frame):
 
     lined = cv.resize(lined,(800,600))
     # Resize and display the image
-    cv.imshow('Image', images)
-    cv.imshow("Grayscale canny vs Amax canny vs amax adaptive canny", np.hstack((img_3, img_4, img_5)))
+    # cv.imshow('Image', images)
+    # cv.imshow("Grayscale canny vs Amax canny vs amax adaptive canny", np.hstack((img_3, img_4, img_5)))
     cv.imshow('Lines', lined)
     if cv.waitKey(1) == ord('q'):
        return
