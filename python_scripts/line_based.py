@@ -4,8 +4,12 @@ import features
 import debug
 import numpy as np
 import cv2 as cv
+import dearpygui.dearpygui as dpg
+
+
 
 def process_frame(frame):
+
     img = frame
     img = cv.resize(img, (500, 400))
 
@@ -33,4 +37,18 @@ def process_frame(frame):
     if cv.waitKey(1) == ord('q'):
        return
 
-camera_main.camera_main_loop(process_frame)
+dpg.create_context()
+dpg.create_viewport()
+dpg.setup_dearpygui()
+with dpg.window(label="Example Window"):
+        dpg.add_text("Hello world")
+        dpg.add_input_text(label="string")
+        dpg.add_slider_float(label="float")
+
+dpg.show_viewport()
+camera = camera_main.camera_main_coroutine(process_frame)
+while dpg.is_dearpygui_running():
+    next(camera)
+    dpg.render_dearpygui_frame()
+
+dpg.destroy_context()
