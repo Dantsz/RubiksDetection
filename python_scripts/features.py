@@ -76,3 +76,11 @@ def point_merge(points : [np.ndarray], lines : [(np.ndarray, np.ndarray)], dista
             if np.linalg.norm(points[i]-points[j]) < distance:
                 points[j] = points[i]
     return points
+
+def for_each_line_pair(lines: [(np.ndarray,np.ndarray)], func: callable) -> [np.ndarray]:
+    'Applies func to each pair of lines in lines, returns the result of func'
+    results = []
+    for i in range(len(lines)):
+        for j in range(i+1, len(lines)):
+            results.append(func(lines[i], lines[j]))
+    return results
