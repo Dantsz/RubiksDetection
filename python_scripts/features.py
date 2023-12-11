@@ -84,3 +84,20 @@ def for_each_line_pair(lines: [(np.ndarray,np.ndarray)], func: callable) -> [np.
         for j in range(i+1, len(lines)):
             results.append(func(lines[i], lines[j]))
     return results
+
+def line_endpoints_distance(line1: np.ndarray, line2: np.ndarray) -> np.ndarray:
+    'Returns the distance between the endpoints of the two lines'
+    distances = np.zeros((2, 2))
+    x1, y1, x2, y2 = line1
+    x3, y3, x4, y4 = line2
+    distances[0, 0] = np.linalg.norm(np.array((x1, y1)) - np.array((x3, y3)))
+    distances[0, 1] = np.linalg.norm(np.array((x1, y1)) - np.array((x4, y4)))
+    distances[1, 0] = np.linalg.norm(np.array((x2, y2)) - np.array((x3, y3)))
+    distances[1, 1] = np.linalg.norm(np.array((x2, y2)) - np.array((x4, y4)))
+    return distances
+
+def line_proximity(line1: np.ndarray, line2: np.ndarray, threshold: float) -> bool:
+    'Returns true if the endpoints of the two lines are within threshold distance of each other'
+    x1, y1, x2, y2 = line1
+    x3, y3, x4, y4 = line2
+    return np.linalg.norm(np.array((x1, y1)) - np.array((x3, y3))) < threshold or np.linalg.norm(np.array((x1, y1)) - np.array((x4, y4))) < threshold or np.linalg.norm(np.array((x2, y2)) - np.array((x3, y3))) < threshold or np.linalg.norm(np.array((x2, y2)) - np.array((x4, y4))) < threshold
