@@ -74,7 +74,7 @@ def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = 11, morp
     kernel = np.ones((morphological_kernel, morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     #Dilate 3x3
-    thresh = cv.dilate(thresh, np.ones((15, 15), np.uint8), iterations=1)
+    thresh = cv.dilate(thresh, np.ones((3, 3), np.uint8), iterations=1)
     thresh = cv.GaussianBlur(thresh, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
     edges = cv.Canny(thresh, 100, 200)
     return edges
