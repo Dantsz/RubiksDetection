@@ -47,9 +47,12 @@ def high_pass_grayscale_filter(img: cv.Mat) -> cv.Mat:
     return laplacian
 
 
-def canny_convert_filter(img: cv.Mat) -> cv.Mat:
+def canny_convert_filter(img: cv.Mat,gaussian_blur_kerner: int = 11, laplacian_k_size: int = 5, dilate_k_size: int = 3) -> cv.Mat:
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    gray = cv.GaussianBlur(gray, (5, 5), 0)
+    gray = cv.Laplacian(gray, cv.CV_64F,ksize = laplacian_k_size)
+    gray = cv.convertScaleAbs(gray)
+    gray = cv.dilate(gray, np.ones((dilate_k_size, dilate_k_size), np.uint8), iterations=1)
+    gray = cv.GaussianBlur(gray, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
     edges = cv.Canny(gray, 100, 200)
     return edges
 

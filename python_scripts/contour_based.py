@@ -14,19 +14,18 @@ def process_frame(frame):
 
     img = frame
     img = cv.resize(img, (500, 400))
-
-    img_1 = filtering.canny_amax_adaptive_filter(img,gaussian_blur_kerner=11)
+    img_1 = filtering.canny_convert_filter(img)
     #Invert
-    img_1 = cv.bitwise_not(img_1)
 
     #Find contours with opencv
     contours, hierarchy = cv.findContours(img_1, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     #Draw contours
-    img_1 = cv.drawContours(img_1, contours, -1, (0,255,0), 1)
+    img_2 = cv.cvtColor(img_1, cv.COLOR_GRAY2BGR)
+    img_2 = cv.drawContours(img_2, contours, -1, (0,255,0), 1)
     #resize to 900x600
-    img_1 = cv.resize(img_1, (900, 600))
+    img_2 = cv.resize(img_2, (900, 600))
     #Display image
-    cv.imshow("contours", img_1)
+    cv.imshow("contours", img_2)
     if cv.waitKey(1) == ord('q'):
        return
 
