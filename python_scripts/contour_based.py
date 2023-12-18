@@ -17,13 +17,14 @@ def process_frame(frame):
     img = cv.resize(img, (500, 400))
     img_1 = filtering.canny_amax_adaptive_filter(img)
     #Find contours with opencv
-    contours, hierarchy = cv.findContours(img_1, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_1, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     contours = features.contours_filter_small_area(contours, 200)
     contours = features.contours_filter_solidity(contours, 0.9)
     contours = features.contours_filter_positional_2(contours, 1)
     #Draw contours
-    img_2 = np.zeros((img_1.shape[0], img_1.shape[1], 3), dtype=np.uint8)
-    img_2 = cv.drawContours(img_2, contours, -1, (0,255,0), 1)
+    #img_2 = np.zeros((img_1.shape[0], img_1.shape[1], 3), dtype=np.uint8)
+    img_2 = cv.cvtColor(img_1, cv.COLOR_GRAY2BGR)
+    img_2 = cv.drawContours(img_2, contours, -1, (0,255,0), 3)
     #resize to 900x600
     img_2 = cv.resize(img_2, (900, 600))
     #Display image
