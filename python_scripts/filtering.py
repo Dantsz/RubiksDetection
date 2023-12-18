@@ -7,18 +7,18 @@ import numpy as np
 # THE CUBE SQUARES ARE WHITE AND CUBE LINES ARE BLACK
 # """
 
-def adaptive_amax_filter(img: cv.Mat) -> cv.Mat:
+def adaptive_amax_filter(img: cv.Mat, gaussian_blur_kerner: int = 7, median_blur_kernel: int = 7, morphological_kernel: int = 5) -> cv.Mat:
     gray = np.amax(img, axis=2)
     #blur
-    gray = cv.GaussianBlur(gray, (7, 7), 0)
-    gray = cv.medianBlur(gray, 7)
+    gray = cv.GaussianBlur(gray, (gaussian_blur_kerner), 0)
+    gray = cv.medianBlur(gray, median_blur_kernel)
     # Do adaptive thesholding
     thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)
     #Do close
-    close_kernel = np.ones((5,5), np.uint8)
+    close_kernel = np.ones((morphological_kernel, morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
     #Do opening
-    kernel = np.ones((5, 5), np.uint8)
+    kernel = np.ones((morphological_kernel,morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     return thresh
 
@@ -59,19 +59,19 @@ def canny_amax_filter(img: cv.Mat) -> cv.Mat:
     edges = cv.Canny(gray, 100, 200)
     return edges
 
-def canny_amax_adaptive_filter(img: cv.Mat) -> cv.Mat:
+def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = 11, median_blur_kernel: int = 11, morphological_kernel: int = 3) -> cv.Mat:
     gray =  np.amax(img, axis=2)
-    gray = cv.GaussianBlur(gray, (11, 11), 0)
-    gray = cv.medianBlur(gray, 11)
+    gray = cv.GaussianBlur(gray, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
+    gray = cv.medianBlur(gray, median_blur_kernel)
     # Do adaptive thesholding
     thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)
     #Do close
-    close_kernel = np.ones((3,3), np.uint8)
+    close_kernel = np.ones((morphological_kernel,morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
     #Do opening
-    kernel = np.ones((3, 3), np.uint8)
+    kernel = np.ones((morphological_kernel, morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
-    thresh = cv.GaussianBlur(thresh, (11, 11), 0)
+    thresh = cv.GaussianBlur(thresh, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
     edges = cv.Canny(thresh, 100, 200)
     return edges
 
