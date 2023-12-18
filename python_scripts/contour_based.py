@@ -15,7 +15,7 @@ def process_frame(frame):
     img = frame
     img = cv.resize(img, (500, 400))
 
-    img_1 = filtering.canny_amax_adaptive_filter(img,gaussian_blur_kerner=7)
+    img_1 = filtering.canny_amax_adaptive_filter(img,gaussian_blur_kerner=11)
     #Invert
     img_1 = cv.bitwise_not(img_1)
 
