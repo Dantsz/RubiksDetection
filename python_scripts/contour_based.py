@@ -9,8 +9,10 @@ import dearpygui.dearpygui as dpg
 
 ui_elements : dict = {
     "contours_count" : 0,
-    "show_unfiltered" : False,
+    "display_mode" : "contours",
 }
+
+diplay_modes: list = ["original", "filtered", "contours"]
 
 def process_frame(frame):
 
@@ -24,8 +26,10 @@ def process_frame(frame):
     contours = features.contours_filter_positional_2(contours, 1)
     #Draw contours
     img_2 = np.zeros((img_1.shape[0], img_1.shape[1], 3), dtype=np.uint8)
-    if dpg.get_value(ui_elements["show_unfiltered"]):
+    if dpg.get_value(ui_elements["display_mode"]) == "filtered":
         img_2 = cv.cvtColor(img_1, cv.COLOR_GRAY2BGR)
+    elif dpg.get_value(ui_elements["display_mode"]) == "original":
+        img_2 = img
     img_2 = cv.drawContours(img_2, contours, -1, (0,255,0), 3)
     #resize to 900x600
     img_2 = cv.resize(img_2, (900, 600))
@@ -40,7 +44,7 @@ dpg.create_viewport(width=600, height=600)
 dpg.setup_dearpygui()
 with dpg.window(label="Contour detection", width=600, height=600, no_resize=True, no_move=True, no_collapse=True, no_close=True):
     ui_elements['contours_count'] = dpg.add_text("Contours count: "+str(ui_elements["contours_count"]))
-    ui_elements['show_unfiltered'] = dpg.add_checkbox(label="Show unfiltered", default_value=False)
+    ui_elements['display_mode'] = dpg.add_combo(label = "Display mode", items=diplay_modes, default_value=ui_elements["display_mode"])
 
 dpg.show_viewport()
 camera = camera_main.camera_main_coroutine(process_frame)
