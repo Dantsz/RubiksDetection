@@ -101,3 +101,39 @@ def line_proximity(line1: np.ndarray, line2: np.ndarray, threshold: float) -> bo
     x1, y1, x2, y2 = line1
     x3, y3, x4, y4 = line2
     return np.linalg.norm(np.array((x1, y1)) - np.array((x3, y3))) < threshold or np.linalg.norm(np.array((x1, y1)) - np.array((x4, y4))) < threshold or np.linalg.norm(np.array((x2, y2)) - np.array((x3, y3))) < threshold or np.linalg.norm(np.array((x2, y2)) - np.array((x4, y4))) < threshold
+
+def contours_filter_small_area(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+    'Returns the contours that are larger than threshold'
+    return [contour for contour in contours if cv.contourArea(contour) > threshold]
+
+def contours_filter_large(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+    'Returns the contours that are smaller than threshold'
+    return [contour for contour in contours if cv.contourArea(contour) < threshold]
+
+def contours_filter_convex(contours: [np.ndarray]) -> [np.ndarray]:
+    'Returns the contours that are convex'
+    return [contour for contour in contours if cv.isContourConvex(contour)]
+
+def contours_filter_solidity(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+    'Returns the contours that have solidity larger than threshold'
+    return [contour for contour in contours if cv.contourArea(contour)/cv.contourArea(cv.convexHull(contour)) > threshold]
+
+def distance(point1, point2):
+    return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+
+def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+    'Returns the contours that are within (perimeter/4) distance from the center of mass of a another contour'
+    filtered_contours = []
+    for i in range(len(contours)):
+        for j in range(i+1, len(contours)):
+            contour1 = contours[i]
+            contour2 = contours[j]
+            M1 = cv.moments(contour1)
+            M2 = cv.moments(contour2)
+            center1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
+            center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
+            if distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/4):
+                filtered_contours.append(contour1)
+                filtered_contours.append(contour2)
+
+    return filtered_contours
