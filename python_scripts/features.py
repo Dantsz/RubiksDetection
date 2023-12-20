@@ -137,3 +137,7 @@ def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [n
                 filtered_contours.append(contour2)
 
     return filtered_contours
+
+def approx_polygon_from_contour(contours: [np.ndarray] , epsilon: float = 10) -> np.ndarray:
+    'Returns the approximated polygon of the contours'
+    return [cv.approxPolyDP(contour, epsilon, True) for contour in contours]

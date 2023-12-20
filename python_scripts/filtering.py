@@ -71,6 +71,7 @@ def canny_amax_filter(img: cv.Mat) -> cv.Mat:
 
 def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = 7, morphological_kernel: int = 3) -> cv.Mat:
     gray =  np.amax(img, axis=2)
+    gray = cv.convertScaleAbs(gray)
     gray = cv.GaussianBlur(gray, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
     # Do adaptive thesholding
     thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)

@@ -10,6 +10,7 @@ import dearpygui.dearpygui as dpg
 ui_elements : dict = {
     "contours_count" : 0,
     "display_mode" : "contours",
+    "approximate contours" : True
 }
 
 diplay_modes: list = ["original", "filtered", "contours"]
@@ -24,6 +25,8 @@ def process_frame(frame):
     contours = features.contours_filter_small_area(contours, 200)
     contours = features.contours_filter_solidity(contours, 0.9)
     contours = features.contours_filter_positional_2(contours, 1)
+    if dpg.get_value(ui_elements["approximate contours"]):
+        contours = features.approx_polygon_from_contour(contours)
     #Draw contours
     img_2 = np.zeros((img_1.shape[0], img_1.shape[1], 3), dtype=np.uint8)
     if dpg.get_value(ui_elements["display_mode"]) == "filtered":
@@ -31,6 +34,13 @@ def process_frame(frame):
     elif dpg.get_value(ui_elements["display_mode"]) == "original":
         img_2 = img
     img_2 = cv.drawContours(img_2, contours, -1, (0,255,0), 3)
+    if dpg.get_value(ui_elements["approximate contours"]):
+        for contour in contours:
+            M = cv.moments(contour)
+            if M["m00"] == 0:
+                continue
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            cv.putText(img_2, str(len(contour)), center, cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     #resize to 900x600
     img_2 = cv.resize(img_2, (900, 600))
     #Display image
@@ -45,6 +55,7 @@ dpg.setup_dearpygui()
 with dpg.window(label="Contour detection", width=600, height=600, no_resize=True, no_move=True, no_collapse=True, no_close=True):
     ui_elements['contours_count'] = dpg.add_text("Contours count: "+str(ui_elements["contours_count"]))
     ui_elements['display_mode'] = dpg.add_combo(label = "Display mode", items=diplay_modes, default_value=ui_elements["display_mode"])
+    ui_elements['approximate contours'] = dpg.add_checkbox(label="Approximate contours", default_value=ui_elements["approximate contours"])
 
 dpg.show_viewport()
 camera = camera_main.camera_main_coroutine(process_frame)
