@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import viewport_properties as vp
 
 def extract_lines_houghP(img: cv.Mat) -> [cv.typing.MatLike]:
     lines = cv.HoughLinesP(img, 1, np.pi/45, threshold=50, minLineLength=100, maxLineGap=5)
@@ -138,6 +139,6 @@ def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [n
 
     return filtered_contours
 
-def approx_polygon_from_contour(contours: [np.ndarray] , epsilon: float = 10) -> np.ndarray:
+def approx_polygon_from_contour(contours: [np.ndarray] , epsilon: float = vp.FEATURES_POLY_APPROX_DEFAULT_EPSILON) -> np.ndarray:
     'Returns the approximated polygon of the contours'
     return [cv.approxPolyDP(contour, epsilon, True) for contour in contours]

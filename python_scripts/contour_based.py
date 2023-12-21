@@ -1,7 +1,7 @@
 import camera_main
 import filtering
 import features
-import debug
+import viewport_properties
 import numpy as np
 import cv2 as cv
 import dearpygui.dearpygui as dpg
@@ -18,13 +18,12 @@ diplay_modes: list = ["original", "filtered", "contours"]
 def process_frame(frame):
 
     img = frame
-    img = cv.resize(img, (500, 400))
     img_1 = filtering.canny_amax_adaptive_filter(img)
     #Find contours with opencv
     contours, hierarchy = cv.findContours(img_1, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    contours = features.contours_filter_small_area(contours, 200)
-    contours = features.contours_filter_solidity(contours, 0.9)
-    contours = features.contours_filter_positional_2(contours, 1)
+    contours = features.contours_filter_small_area(contours, viewport_properties.FEATURES_FILTER_MIN_AREA)
+    contours = features.contours_filter_solidity(contours, viewport_properties.FEATURES_FILTER_SOLIDITY)
+    contours = features.contours_filter_positional_2(contours, viewport_properties.FEATURES_FILTER_POSITIONAL_2_DISTANCE)
     if dpg.get_value(ui_elements["approximate contours"]):
         contours = features.approx_polygon_from_contour(contours)
     #Draw contours

@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-
+import viewport_properties as vp
 # """
 # FUNCTIONS SHOULD HAVE THE SAME BEHAVIOR:
 # TRANFORM THE RGB INTO A BINARY IMAGE WHERE
@@ -69,12 +69,12 @@ def canny_amax_filter(img: cv.Mat) -> cv.Mat:
     edges = cv.Canny(gray, 100, 200)
     return edges
 
-def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = 7, morphological_kernel: int = 3) -> cv.Mat:
+def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = vp.FILTER_GAUSSIAN_DEFAULT_KSIZE, morphological_kernel: int = vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE) -> cv.Mat:
     gray =  np.amax(img, axis=2)
     gray = cv.convertScaleAbs(gray)
     gray = cv.GaussianBlur(gray, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
     # Do adaptive thesholding
-    thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 2)
+    thresh = cv.adaptiveThreshold(gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, vp.FILTER_ADAPTIVE_THRESHOLD_BLOCK_SIZE, vp.FILTER_ADAPTIVE_THRESHOLD_CONSTANT)
     #Do close
     close_kernel = np.ones((morphological_kernel,morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_CLOSE, close_kernel)
@@ -82,9 +82,9 @@ def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = 7, morph
     kernel = np.ones((morphological_kernel, morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     #Dilate 3x3
-    thresh = cv.dilate(thresh, np.ones((3, 3), np.uint8), iterations=1)
+    thresh = cv.dilate(thresh, np.ones((vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE, vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE), np.uint8), iterations=1)
     thresh = cv.GaussianBlur(thresh, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
-    edges = cv.Canny(thresh, 100, 200)
+    edges = cv.Canny(thresh, vp.FILTER_CANNY_THRESHOLD_1, vp.FILTER_CANNY_THRESHOLD_2)
     return edges
 
 def sobel_amax_filter(img: cv.Mat) -> cv.Mat:

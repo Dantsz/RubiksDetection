@@ -3,6 +3,7 @@ import cv2 as cv
 import filtering
 import features
 import debug
+import viewport_properties as viewport_properties
 def camera_main_loop(frame_process_routine):
     cap = cv.VideoCapture(0)
     if not cap.isOpened():
@@ -35,7 +36,7 @@ def camera_main_coroutine(frame_process_routine):
             break
         # Load an image
         img = frame
-        img = cv.resize(img, (500, 400))
+        img = cv.resize(img, (viewport_properties.WIDTH, viewport_properties.HEIGHT))
         # Apply the routine
         frame_process_routine(img)
         yield
