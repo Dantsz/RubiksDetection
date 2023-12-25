@@ -1,6 +1,6 @@
 # Values related to the detection the image
-WIDTH = 500
-HEIGHT = 400
+WIDTH = 640
+HEIGHT = 480
 
 FEATURES_FILTER_MIN_AREA = 250
 FEATURES_FILTER_SOLIDITY = 0.9
