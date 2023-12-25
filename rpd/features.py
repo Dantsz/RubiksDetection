@@ -128,7 +128,8 @@ def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [n
             center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
             if distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/3):
                 filtered_contours.append(contour1)
-                filtered_contours.append(contour2)
+                if not any(np.array_equal(contour1, contour) for contour in filtered_contours):
+                    filtered_contours.append(contour2)
 
     return filtered_contours
 
