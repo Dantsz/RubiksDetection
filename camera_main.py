@@ -1,9 +1,7 @@
 import numpy as np
 import cv2 as cv
-import filtering
-import features
-import debug
-import viewport_properties as viewport_properties
+from python_scripts import viewport_properties
+
 def camera_main_loop(frame_process_routine):
     cap = cv.VideoCapture(0)
     if not cap.isOpened():

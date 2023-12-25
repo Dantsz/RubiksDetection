@@ -1,12 +1,11 @@
-import camera_main
-import filtering
-import features
-import viewport_properties
 import numpy as np
 import cv2 as cv
 import dearpygui.dearpygui as dpg
 
-
+from python_scripts import viewport_properties
+import camera_main
+from python_scripts import filtering
+from python_scripts import features
 ui_elements : dict = {
     "contours_count" : 0,
     "display_mode" : "contours",
