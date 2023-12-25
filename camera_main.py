@@ -1,6 +1,6 @@
 import numpy as np
 import cv2 as cv
-from python_scripts import viewport_properties
+from rpd import viewport_properties
 
 def camera_main_loop(frame_process_routine):
     cap = cv.VideoCapture(0)
