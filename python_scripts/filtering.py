@@ -7,7 +7,7 @@ from . import viewport_properties as vp
 # THE CUBE SQUARES ARE WHITE AND CUBE LINES ARE BLACK
 # """
 
-def adaptive_amax_filter(img: cv.Mat, gaussian_blur_kerner: int = 7, median_blur_kernel: int = 7, morphological_kernel: int = 5) -> cv.Mat:
+def adaptive_amax_filter(img, gaussian_blur_kerner: int = 7, median_blur_kernel: int = 7, morphological_kernel: int = 5) :
     gray = np.amax(img, axis=2)
     #blur
     gray = cv.GaussianBlur(gray, (gaussian_blur_kerner), 0)
@@ -22,7 +22,7 @@ def adaptive_amax_filter(img: cv.Mat, gaussian_blur_kerner: int = 7, median_blur
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     return thresh
 
-def adaptive_high_pass_filter(img: cv.Mat) -> cv.Mat:
+def adaptive_high_pass_filter(img) :
     gray = np.amax(img, axis=2)
     #blur
     gray = cv.medianBlur(gray, 15)
@@ -35,7 +35,7 @@ def adaptive_high_pass_filter(img: cv.Mat) -> cv.Mat:
     _, thresh = cv.threshold(laplacian, 45, 255, cv.THRESH_BINARY)
     return thresh
 
-def high_pass_grayscale_filter(img: cv.Mat) -> cv.Mat:
+def high_pass_grayscale_filter(img) :
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     #blur
     gray = cv.medianBlur(gray, 11)
@@ -47,7 +47,7 @@ def high_pass_grayscale_filter(img: cv.Mat) -> cv.Mat:
     return laplacian
 
 
-def canny_convert_filter(img: cv.Mat,gaussian_blur_kerner: int = 11, laplacian_k_size: int = 5, morphological_kernel: int = 3) -> cv.Mat:
+def canny_convert_filter(img,gaussian_blur_kerner: int = 11, laplacian_k_size: int = 5, morphological_kernel: int = 3) :
     #amax
     gray = np.amax(img, axis=2)
     gray = cv.Laplacian(gray, cv.CV_64F,ksize = laplacian_k_size)
@@ -63,13 +63,13 @@ def canny_convert_filter(img: cv.Mat,gaussian_blur_kerner: int = 11, laplacian_k
     edges = cv.Canny(gray, 100, 200)
     return edges
 
-def canny_amax_filter(img: cv.Mat) -> cv.Mat:
+def canny_amax_filter(img) :
     gray =  np.amax(img, axis=2)
     gray = cv.GaussianBlur(gray, (5, 5), 0)
     edges = cv.Canny(gray, 100, 200)
     return edges
 
-def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = vp.FILTER_GAUSSIAN_DEFAULT_KSIZE, morphological_kernel: int = vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE) -> cv.Mat:
+def canny_amax_adaptive_filter(img, gaussian_blur_kerner: int = vp.FILTER_GAUSSIAN_DEFAULT_KSIZE, morphological_kernel: int = vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE) :
     gray =  np.amax(img, axis=2)
     gray = cv.convertScaleAbs(gray)
     gray = cv.GaussianBlur(gray, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
@@ -86,7 +86,7 @@ def canny_amax_adaptive_filter(img: cv.Mat, gaussian_blur_kerner: int = vp.FILTE
     edges = cv.Canny(thresh, vp.FILTER_CANNY_THRESHOLD_1, vp.FILTER_CANNY_THRESHOLD_2)
     return edges
 
-def sobel_amax_filter(img: cv.Mat) -> cv.Mat:
+def sobel_amax_filter(img) :
     gray = np.amax(img, axis=2)
     #blur
     gray = cv.GaussianBlur(gray, (15, 15), 0)
@@ -98,7 +98,7 @@ def sobel_amax_filter(img: cv.Mat) -> cv.Mat:
     sobel = np.uint8(np.absolute(sobel))
     return sobel
 
-def sobel_grayscale_filter(img: cv.Mat) -> cv.Mat:
+def sobel_grayscale_filter(img) :
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     #blur
     gray = cv.GaussianBlur(gray, (15, 15), 0)
