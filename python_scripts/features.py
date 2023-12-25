@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-import viewport_properties as vp
+from . import viewport_properties as vp
 
 def extract_lines_houghP(img: cv.Mat) -> [cv.typing.MatLike]:
     lines = cv.HoughLinesP(img, 1, np.pi/45, threshold=50, minLineLength=100, maxLineGap=5)

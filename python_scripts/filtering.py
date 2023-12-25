@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-import viewport_properties as vp
+from . import viewport_properties as vp
 # """
 # FUNCTIONS SHOULD HAVE THE SAME BEHAVIOR:
 # TRANFORM THE RGB INTO A BINARY IMAGE WHERE
