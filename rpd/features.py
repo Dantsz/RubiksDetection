@@ -126,9 +126,10 @@ def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [n
             M2 = cv.moments(contour2)
             center1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
             center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
-            if distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/3):
-                filtered_contours.append(contour1)
+            if distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/4 + cv.arcLength(contour2, True)/4):
                 if not any(np.array_equal(contour1, contour) for contour in filtered_contours):
+                    filtered_contours.append(contour1)
+                if not any(np.array_equal(contour2, contour) for contour in filtered_contours):
                     filtered_contours.append(contour2)
 
     return filtered_contours
@@ -136,3 +137,7 @@ def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [n
 def approx_polygon_from_contour(contours: [np.ndarray] , epsilon: float = vp.FEATURES_POLY_APPROX_DEFAULT_EPSILON) -> np.ndarray:
     'Returns the approximated polygon of the contours'
     return [cv.approxPolyDP(contour, epsilon, True) for contour in contours]
+
+def contours_filter_vertices(contours: [np.ndarray], threshold: int = 2) -> [np.ndarray]:
+    'Returns the contours that have number of vertices larger than threshold'
+    return [contour for contour in contours if len(contour) > threshold]
