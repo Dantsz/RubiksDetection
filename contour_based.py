@@ -44,6 +44,16 @@ def process_frame(frame):
     img_2 = cv.resize(img_2, (900, 600))
     #Display image
     cv.imshow("contours", img_2)
+
+    #Display cropped parts of the image
+    imgs = features.contours_crop_and_reverse_perspective(frame, contours)
+    if len(imgs) != 0:
+        # convert all images to 100x100
+        imgs = [cv.resize(img, (100, 100)) for img in imgs]
+        # stack vertically
+        imgs = np.vstack(imgs)
+        #display image
+        cv.imshow("cropped", imgs)
     dpg.set_value(ui_elements["contours_count"], "Contours count: "+str(len(contours)))
     if cv.waitKey(1) == ord('q'):
        return

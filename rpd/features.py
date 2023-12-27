@@ -141,3 +141,15 @@ def approx_polygon_from_contour(contours: [np.ndarray] , epsilon: float = vp.FEA
 def contours_filter_vertices(contours: [np.ndarray], threshold: int = 2) -> [np.ndarray]:
     'Returns the contours that have number of vertices larger than threshold'
     return [contour for contour in contours if len(contour) > threshold]
+
+def contours_crop_and_reverse_perspective(image, contours: [np.ndarray]) -> [np.ndarray]:
+    '''Returns the cropped parts of the image that are inside the bounding boxes of the contours'''
+    cropped_images = []
+    for contour in contours:
+        box = np.int0(cv.boxPoints(cv.minAreaRect(contour)))
+        pts1 = np.float32(box)
+        pts2 = np.float32([[0, 0], [100, 0], [100, 100], [0, 100]])
+        matrix = cv.getPerspectiveTransform(pts1, pts2)
+        cropped_images.append(cv.warpPerspective(image, matrix, (100, 100)))
+
+    return cropped_images
