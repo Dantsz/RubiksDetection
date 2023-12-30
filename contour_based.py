@@ -46,10 +46,9 @@ def process_frame(frame):
     cv.imshow("contours", img_2)
 
     #Display cropped parts of the image
-    imgs = features.contours_crop_and_reverse_perspective(frame, contours)
+    imgs = features.contours_crop_and_reverse_perspective(frame, contours, (25,25))
+
     if len(imgs) != 0:
-        # convert all images to 100x100
-        imgs = [cv.resize(img, (100, 100)) for img in imgs]
         # stack vertically
         imgs = np.vstack(imgs)
         #display image

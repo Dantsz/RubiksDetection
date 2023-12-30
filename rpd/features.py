@@ -142,14 +142,15 @@ def contours_filter_vertices(contours: [np.ndarray], threshold: int = 2) -> [np.
     'Returns the contours that have number of vertices larger than threshold'
     return [contour for contour in contours if len(contour) > threshold]
 
-def contours_crop_and_reverse_perspective(image, contours: [np.ndarray]) -> [np.ndarray]:
+def contours_crop_and_reverse_perspective(image, contours: [np.ndarray], image_size : (int,int)) -> [np.ndarray]:
     '''Returns the cropped parts of the image that are inside the bounding boxes of the contours'''
     cropped_images = []
+    image_width, image_height = image_size
     for contour in contours:
         box = np.int0(cv.boxPoints(cv.minAreaRect(contour)))
         pts1 = np.float32(box)
-        pts2 = np.float32([[0, 0], [100, 0], [100, 100], [0, 100]])
+        pts2 = np.float32([[0, 0], [image_width, 0], [image_width, image_height], [0, image_height]])
         matrix = cv.getPerspectiveTransform(pts1, pts2)
-        cropped_images.append(cv.warpPerspective(image, matrix, (100, 100)))
+        cropped_images.append(cv.warpPerspective(image, matrix, (image_width, image_height)))
 
     return cropped_images
