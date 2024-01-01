@@ -115,7 +115,7 @@ def contours_filter_solidity(contours: [np.ndarray], threshold: float) -> [np.nd
 def distance(point1, point2):
     return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
-def contours_filter_positional_2(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+def contours_filter_isolated_contours(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
     'Returns the contours that are within (perimeter/4) distance from the center of mass of a another contour'
     filtered_contours = []
     for i in range(len(contours)):

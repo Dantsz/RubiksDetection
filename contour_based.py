@@ -25,7 +25,7 @@ def process_frame(frame):
     if dpg.get_value(ui_elements["approximate contours"]):
         contours = features.approx_polygon_from_contour(contours)
     contours = features.contours_filter_vertices(contours)
-    contours = features.contours_filter_positional_2(contours, viewport_properties.FEATURES_FILTER_POSITIONAL_2_DISTANCE)
+    contours = features.contours_filter_isolated_contours(contours, viewport_properties.FEATURES_FILTER_POSITIONAL_2_DISTANCE)
     #Draw contours
     img_2 = np.zeros((img_1.shape[0], img_1.shape[1], 3), dtype=np.uint8)
     if dpg.get_value(ui_elements["display_mode"]) == "filtered":
