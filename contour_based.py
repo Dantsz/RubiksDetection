@@ -21,6 +21,7 @@ def process_frame(frame):
     #Find contours with opencv
     contours, hierarchy = cv.findContours(img_1, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     contours = features.contours_filter_small_area(contours, viewport_properties.FEATURES_FILTER_MIN_AREA)
+    contours = features.contours_filter_large(contours, viewport_properties.FEATURES_FILTER_MAX_AREA)
     contours = features.contours_filter_solidity(contours, viewport_properties.FEATURES_FILTER_SOLIDITY)
     if dpg.get_value(ui_elements["approximate contours"]):
         contours = features.approx_polygon_from_contour(contours)
