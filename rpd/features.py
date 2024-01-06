@@ -142,6 +142,10 @@ def contours_filter_vertices(contours: [np.ndarray], threshold: int = 2) -> [np.
     'Returns the contours that have number of vertices larger than threshold'
     return [contour for contour in contours if len(contour) > threshold]
 
+def contours_min_area_rect(contours: [np.ndarray]) -> [np.ndarray]:
+    'Returns the minimum area rectangle of the contours'
+    return [cv.boxPoints(cv.minAreaRect(contour)) for contour in contours]
+
 def contours_crop_and_reverse_perspective(image, contours: [np.ndarray], image_size : (int,int)) -> [np.ndarray]:
     '''Returns the cropped parts of the image that are inside the bounding boxes of the contours'''
     cropped_images = []
