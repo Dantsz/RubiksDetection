@@ -23,6 +23,7 @@ class DetectionEngine:
         contours = features.contours_filter_solidity(contours, viewport_properties.FEATURES_FILTER_SOLIDITY)
         contours = features.contours_filter_isolated_contours(contours, viewport_properties.FEATURES_FILTER_POSITIONAL_2_DISTANCE)
         contours = features.approx_polygon_from_contour(contours)
+        contours = features.contours_min_area_rect(contours)
         self.last_frame = frame
         self.last_contours = contours
 
