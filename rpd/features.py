@@ -1,9 +1,10 @@
 import cv2 as cv
 import numpy as np
 from . import viewport_properties as vp
+from typing import List, Tuple
 
 # Return list of pair of lines that are perpendicular
-def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
+def filter_perpendicular_lines(lines: np.ndarray) -> List[Tuple[np.ndarray,np.ndarray]]:
     # Filter lines by slope
     filtered_lines = []
     # iterate over pairs of lines
@@ -33,7 +34,7 @@ def filter_perpendicular_lines(lines: np.ndarray) -> [(np.ndarray,np.ndarray)]:
                 filtered_lines.append((lines[i],lines[j]))
     return filtered_lines
 
-def find_intersection_points(lines:[(np.ndarray,np.ndarray)]) -> [np.ndarray]:
+def find_intersection_points(lines:List[Tuple[np.ndarray,np.ndarray]]) -> List[np.ndarray]:
     'FInds the intersection points of the two lines for each entry in the array, returns None if no intersection, the index of the entry matches the index of the intersection point'
     intersection_points = []
     for i in range(len(lines)):
@@ -59,7 +60,7 @@ def find_intersection_points(lines:[(np.ndarray,np.ndarray)]) -> [np.ndarray]:
                 intersection_points.append(None)
     return intersection_points
 
-def point_merge(points : [np.ndarray], lines : [(np.ndarray, np.ndarray)], distance: float) -> [np.ndarray]:
+def point_merge(points : List[np.ndarray], lines : List[Tuple[np.ndarray, np.ndarray]], distance: float) -> List[np.ndarray]:
     assert len(points) == len(lines)
     for i in range(len(points)):
         if points[i] is None:
@@ -71,7 +72,7 @@ def point_merge(points : [np.ndarray], lines : [(np.ndarray, np.ndarray)], dista
                 points[j] = points[i]
     return points
 
-def for_each_line_pair(lines: [(np.ndarray,np.ndarray)], func: callable) -> [np.ndarray]:
+def for_each_line_pair(lines: List[Tuple[np.ndarray,np.ndarray]], func: callable) -> List[np.ndarray]:
     'Applies func to each pair of lines in lines, returns the result of func'
     results = []
     for i in range(len(lines)):
@@ -96,26 +97,26 @@ def line_proximity(line1: np.ndarray, line2: np.ndarray, threshold: float) -> bo
     x3, y3, x4, y4 = line2
     return np.linalg.norm(np.array((x1, y1)) - np.array((x3, y3))) < threshold or np.linalg.norm(np.array((x1, y1)) - np.array((x4, y4))) < threshold or np.linalg.norm(np.array((x2, y2)) - np.array((x3, y3))) < threshold or np.linalg.norm(np.array((x2, y2)) - np.array((x4, y4))) < threshold
 
-def contours_filter_small_area(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+def contours_filter_small_area(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that are larger than threshold'
     return [contour for contour in contours if cv.contourArea(contour) > threshold]
 
-def contours_filter_large(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+def contours_filter_large(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that are smaller than threshold'
     return [contour for contour in contours if cv.contourArea(contour) < threshold]
 
-def contours_filter_convex(contours: [np.ndarray]) -> [np.ndarray]:
+def contours_filter_convex(contours: List[np.ndarray]) -> List[np.ndarray]:
     'Returns the contours that are convex'
     return [contour for contour in contours if cv.isContourConvex(contour)]
 
-def contours_filter_solidity(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+def contours_filter_solidity(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that have solidity larger than threshold'
     return [contour for contour in contours if cv.contourArea(contour)/cv.contourArea(cv.convexHull(contour)) > threshold]
 
 def distance(point1, point2):
     return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
-def contours_filter_isolated_contours(contours: [np.ndarray], threshold: float) -> [np.ndarray]:
+def contours_filter_isolated_contours(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that are within (perimeter/4) distance from the center of mass of a another contour'
     filtered_contours = []
     for i in range(len(contours)):
@@ -134,19 +135,19 @@ def contours_filter_isolated_contours(contours: [np.ndarray], threshold: float) 
 
     return filtered_contours
 
-def approx_polygon_from_contour(contours: [np.ndarray] , epsilon: float = vp.FEATURES_POLY_APPROX_DEFAULT_EPSILON) -> np.ndarray:
+def approx_polygon_from_contour(contours: List[np.ndarray] , epsilon: float = vp.FEATURES_POLY_APPROX_DEFAULT_EPSILON) -> np.ndarray:
     'Returns the approximated polygon of the contours'
     return [cv.approxPolyDP(contour, epsilon, True) for contour in contours]
 
-def contours_filter_vertices(contours: [np.ndarray], threshold: int = 2) -> [np.ndarray]:
+def contours_filter_vertices(contours: List[np.ndarray], threshold: int = 2) -> List[np.ndarray]:
     'Returns the contours that have number of vertices larger than threshold'
     return [contour for contour in contours if len(contour) > threshold]
 
-def contours_min_area_rect(contours: [np.ndarray]) -> [np.ndarray]:
+def contours_min_area_rect(contours: List[np.ndarray]) -> List[np.ndarray]:
     'Returns the minimum area rectangle of the contours'
     return [np.int0(cv.boxPoints(cv.minAreaRect(contour))) for contour in contours]
 
-def contours_crop_and_reverse_perspective(image, contours: [np.ndarray], image_size : (int,int)) -> [np.ndarray]:
+def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], image_size : Tuple[int,int]) -> List[np.ndarray]:
     '''Returns the cropped parts of the image that are inside the bounding boxes of the contours'''
     cropped_images = []
     image_width, image_height = image_size
