@@ -1,7 +1,7 @@
-from typing import List
 import numpy as np
 import cv2 as cv
 import math
+from typing import List, Tuple
 
 def estimate_focal_length(image_width: float, fov: float) -> List[np.ndarray]:
     """Returns an estimate of the camera focal length given the image width and the field of view."""
@@ -12,7 +12,7 @@ def build_camera_matrix(fov: float, image_width: float, image_height: float) -> 
     focal_length = estimate_focal_length(image_width, fov)
     return np.array([[focal_length, 0, image_width/2], [0, focal_length, image_height/2], [0, 0, 1]])
 
-def estimate_rectangle_contour_pose(contour: np.ndarray, camera_matrix: np.ndarray) -> tuple:
+def estimate_rectangle_contour_pose(contour: np.ndarray, camera_matrix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Returns the rotation and translation vectors of the contour pose, using the camera matrix and the image size."""
     #Assume the contour comes directly from the process_frame pipeline so the last dimensions need to be removed
     rect_points_2d = contour.squeeze(axis=1).astype(np.float32)

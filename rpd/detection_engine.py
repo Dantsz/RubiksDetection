@@ -8,14 +8,7 @@ from . import features
 from . import viewport_properties
 from . import orientation
 
-def draw(img, center, imgpts):
-    p1 = (int(imgpts[0][0]), int(imgpts[0][1]))
-    p2 = (int(imgpts[1][0]), int(imgpts[1][1]))
-    p3 = (int(imgpts[2][0]), int(imgpts[2][1]))
-    img = cv.line(img, center, p1, (255,0,0), 5)
-    img = cv.line(img, center, p2, (0,255,0), 5)
-    img = cv.line(img, center, p3, (0,0,255), 5)
-    return img
+
 class DetectionEngine:
     def __init__(self):
         logging.info("initializing DetectionEngine")
@@ -39,6 +32,14 @@ class DetectionEngine:
 
     def debug_frame(self, frame: np.ndarray) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
+        def draw(img, center, imgpts):
+            p1 = (int(imgpts[0][0]), int(imgpts[0][1]))
+            p2 = (int(imgpts[1][0]), int(imgpts[1][1]))
+            p3 = (int(imgpts[2][0]), int(imgpts[2][1]))
+            img = cv.line(img, center, p1, (255,0,0), 5)
+            img = cv.line(img, center, p2, (0,255,0), 5)
+            img = cv.line(img, center, p3, (0,0,255), 5)
+            return img
         if frame is None:
             frame = np.zeros((viewport_properties.HEIGHT, viewport_properties.WIDTH, 3), np.uint8)
 
@@ -49,14 +50,15 @@ class DetectionEngine:
                 continue
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             # Use an estimated fov of 65 degrees
-            fov = 65
+            fov = 70
             camera_matrix = orientation.build_camera_matrix(fov, viewport_properties.WIDTH, viewport_properties.HEIGHT)
             (rotation_vector, translation_vector) = orientation.estimate_rectangle_contour_pose(contour, camera_matrix)
             axis = np.float32([[1,0,0], [0,1,0], [0,0,-1]]).reshape(-1,3)
             imgpts, jac = cv.projectPoints(axis, rotation_vector, translation_vector, camera_matrix, None)
             imgpts = imgpts.squeeze(axis=1)
             img_2 = draw(img_2, center, imgpts)
-            cv.circle(img_2, center, 7, (255, 0, 0), -1)
-            cv.putText(img_2, f'{rotation_vector[2][0]:9.4f}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+            # cv.circle(img_2, center, 7, (255, 0, 0), -1)
+            # cv.putText(img_2, f'{rotation_vector[2][0]:9.4f}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+            cv.putText(img_2, f'{len(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
 
         return img_2
