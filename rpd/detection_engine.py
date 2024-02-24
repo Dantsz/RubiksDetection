@@ -7,7 +7,7 @@ from . import filtering
 from . import features
 from . import viewport_properties
 from . import orientation
-
+from . import metafeatures
 
 class DetectionEngine:
     def __init__(self):
@@ -29,6 +29,7 @@ class DetectionEngine:
         # contours = features.contours_min_area_rect(contours)
         self.last_frame = frame
         self.last_contours = contours
+        self.last_face = metafeatures.detect_face(contours)
 
     def debug_frame(self, frame: np.ndarray) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
@@ -90,6 +91,9 @@ class DetectionEngine:
             normal_vector_2 = orientation.compute_rectangle_normal_vector(rotation_vector_2)
             dot_product = np.dot(normal_vector_1, normal_vector_2)
             cv.putText(img_2, f'{dot_product:9.4f}', (center_2[0], center_2[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2, cv.LINE_AA)
-            #END ORIENTATION-BASED CLUSTERING TEST
+        #END ORIENTATION-BASED CLUSTERING TEST
+        face = self.last_face
+        if face is None:
+            print("No face detected")
 
         return img_2
