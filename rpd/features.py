@@ -54,6 +54,10 @@ def contours_min_area_rect(contours: List[np.ndarray]) -> List[np.ndarray]:
     'Returns the minimum area rectangle of the contours'
     return [np.int0(cv.boxPoints(cv.minAreaRect(contour))) for contour in contours]
 
+def contorus_area_similarity(contour1: np.ndarray, contour2: np.ndarray, threshold: float) -> bool:
+    'Returns True if the contours are similar, '
+    return (1 - max(cv.contourArea(contour1), cv.contourArea(contour2))/min(cv.contourArea(contour1), cv.contourArea(contour2))) < threshold
+
 def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], image_size : Tuple[int,int]) -> List[np.ndarray]:
     '''Returns the cropped parts of the image that are inside the bounding boxes of the contours'''
     cropped_images = []
@@ -64,5 +68,16 @@ def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], ima
         pts2 = np.float32([[0, 0], [image_width, 0], [image_width, image_height], [0, image_height]])
         matrix = cv.getPerspectiveTransform(pts1, pts2)
         cropped_images.append(cv.warpPerspective(image, matrix, (image_width, image_height)))
-
     return cropped_images
+
+def contour_basis_change(contour_center: Tuple[int,int], origin : Tuple[int,int], camera_matrix: np.ndarray, rotation_vector: np.ndarray, translation_vector: np.ndarray) -> Tuple[float, float]:
+    '''Returns the contour in the basis of the rotation and translation vectors'''
+    obj_points = np.float32([[contour_center[0] / origin[0], contour_center[1] / origin[1], 0] ]).reshape(-1,3)
+    rotation_matrix, _ = cv.Rodrigues(rotation_vector)
+    inverse_rotation_matrix = rotation_matrix.transpose()
+    # Convert the inverse rotation matrix back to a rotation vector
+    inverse_rotation_vector, _ = cv.Rodrigues(inverse_rotation_matrix)
+    relative_point, _ = cv.projectPoints(obj_points, inverse_rotation_vector, -translation_vector, camera_matrix, None)
+    relative_point = relative_point.squeeze()
+    assert relative_point.shape == (2,), "The relative point should have 2 dimensions"
+    return relative_point.astype(int)

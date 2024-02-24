@@ -61,39 +61,45 @@ class DetectionEngine:
             # cv.circle(img_2, center, 7, (255, 0, 0), -1)
             # cv.putText(img_2, f'{rotation_vector[2][0]:9.4f}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
             cv.putText(img_2, f'{len(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
-        #BEGIN ORIENTATION-BASED CLUSTERING TEST
-        # Take tow contours and compute the dot product between their rotation vectors
-        if len(self.last_contours) < 2:
-            return img_2
-        contour_1 = self.last_contours[0]
+        # #BEGIN ORIENTATION-BASED CLUSTERING TEST
+        # # Take tow contours and compute the dot product between their rotation vectors
+        # if len(self.last_contours) < 2:
+        #     return img_2
+        # contour_1 = self.last_contours[0]
 
-        M_1 = cv.moments(contour_1)
-        if M_1["m00"] == 0:
-            return img_2
-        center_1 = (int(M_1["m10"] / M_1["m00"]), int(M_1["m01"] / M_1["m00"]))
+        # M_1 = cv.moments(contour_1)
+        # if M_1["m00"] == 0:
+        #     return img_2
+        # center_1 = (int(M_1["m10"] / M_1["m00"]), int(M_1["m01"] / M_1["m00"]))
 
-        for i in range(len(self.last_contours)):
-            if i == 0:
-                continue
-            contour_2 = self.last_contours[i]
-            M_2 = cv.moments(contour_2)
-            if M_2["m00"] == 0:
-                return img_2
-            center_2 = (int(M_2["m10"] / M_2["m00"]), int(M_2["m01"] / M_2["m00"]))
+        # for i in range(len(self.last_contours)):
+        #     if i == 0:
+        #         continue
+        #     contour_2 = self.last_contours[i]
+        #     M_2 = cv.moments(contour_2)
+        #     if M_2["m00"] == 0:
+        #         return img_2
+        #     center_2 = (int(M_2["m10"] / M_2["m00"]), int(M_2["m01"] / M_2["m00"]))
 
-            cv.circle(img_2, center_1, 7, (255, 255, 0), -1)
-            cv.circle(img_2, center_2, 7, (0, 255, 255), -1)
-            fov = viewport_properties.ORIENTATION_ESTIMATED_FOV
-            camera_matrix = orientation.build_camera_matrix(fov, viewport_properties.WIDTH, viewport_properties.HEIGHT)
-            (rotation_vector_1, _) = orientation.estimate_rectangle_contour_pose(contour_1, camera_matrix)
-            (rotation_vector_2, _) = orientation.estimate_rectangle_contour_pose(contour_2, camera_matrix)
-            normal_vector_1 = orientation.compute_rectangle_normal_vector(rotation_vector_1)
-            normal_vector_2 = orientation.compute_rectangle_normal_vector(rotation_vector_2)
-            dot_product = np.dot(normal_vector_1, normal_vector_2)
-            cv.putText(img_2, f'{dot_product:9.4f}', (center_2[0], center_2[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2, cv.LINE_AA)
-        #END ORIENTATION-BASED CLUSTERING TEST
+        #     cv.circle(img_2, center_1, 7, (255, 255, 0), -1)
+        #     cv.circle(img_2, center_2, 7, (0, 255, 255), -1)
+        #     fov = viewport_properties.ORIENTATION_ESTIMATED_FOV
+        #     camera_matrix = orientation.build_camera_matrix(fov, viewport_properties.WIDTH, viewport_properties.HEIGHT)
+        #     (rotation_vector_1, _) = orientation.estimate_rectangle_contour_pose(contour_1, camera_matrix)
+        #     (rotation_vector_2, _) = orientation.estimate_rectangle_contour_pose(contour_2, camera_matrix)
+        #     normal_vector_1 = orientation.compute_rectangle_normal_vector(rotation_vector_1)
+        #     normal_vector_2 = orientation.compute_rectangle_normal_vector(rotation_vector_2)
+        #     dot_product = np.dot(normal_vector_1, normal_vector_2)
+        #     cv.putText(img_2, f'{dot_product:9.4f}', (center_2[0], center_2[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2, cv.LINE_AA)
+        # #END ORIENTATION-BASED CLUSTERING TEST
         face = self.last_face
         if face is None:
             print("No face detected")
-
+        else:
+            for i in range(len(face['contours'])):
+                img_2 = cv.drawContours(img_2, [face['contours'][i]], -1, (0,0,255), 3)
+                pos = face['relative_positions'][i]
+                cv.putText(img_2, f'{pos}', face['centers'][i], cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
+            #color center square yellow
+            cv.drawContours(img_2, [face['contours'][0]], -1, (0,255,255), 3)
         return img_2
