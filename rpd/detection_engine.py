@@ -96,10 +96,14 @@ class DetectionEngine:
         if face is None:
             print("No face detected")
         else:
-            for i in range(len(face['contours'])):
-                img_2 = cv.drawContours(img_2, [face['contours'][i]], -1, (0,0,255), 3)
-                pos = face['relative_positions'][i]
-                cv.putText(img_2, f'{pos}', face['centers'][i], cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
-            #color center square yellow
-            cv.drawContours(img_2, [face['contours'][0]], -1, (0,255,255), 3)
+            # for i in range(len(face['contours'])):
+            #     img_2 = cv.drawContours(img_2, [face['contours'][i]], -1, (0,0,255), 3)
+            #     pos = face['relative_positions'][i]
+            #     cv.putText(img_2, f'{pos}', face['centers'][i], cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
+            # #color center square yellow
+            # cv.drawContours(img_2, [face['contours'][0]], -1, (0,255,255), 3)
+            for i, row in enumerate(face):
+                for j, square in enumerate(row):
+                    img_2 = cv.drawContours(img_2, [square['contour']], -1, (0,0,255), 3)
+                    cv.putText(img_2, f'{(i,j)}', square['center'], cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
         return img_2

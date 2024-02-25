@@ -6,7 +6,7 @@ from . import viewport_properties as vp
 from . import orientation
 from . import features
 
-def detect_face(contours: List[np.ndarray]) -> dict | None:
+def detect_face(contours: List[np.ndarray]) -> List[List[dict]] | None:
     """Find the face of the cube in the contours list."""
     if len(contours) < 9: # We need at least 9 contours to form a cube for now
         return None
@@ -36,6 +36,7 @@ def detect_face(contours: List[np.ndarray]) -> dict | None:
         if contours_orientations[i] is None:
             continue
         face = [contours[i]]
+        ids = [i]
 
         (rotation_vector, translation_vector, normal_vector) = contours_orientations[i]
         relative_positions = [(features.contour_basis_change(centers_of_mass[i], centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))]
@@ -50,9 +51,26 @@ def detect_face(contours: List[np.ndarray]) -> dict | None:
             if distance < (cv.arcLength(contours[i], True)/3 + cv.arcLength(contours[j], True)/3) and features.contorus_area_similarity(contours[i], contours[j], 0.1):
                 #Find position of the neighbor contour relative to the center contour
                 face.append(contours[j])
+                ids.append(j)
                 relative_positions.append(features.contour_basis_change(centers_of_mass[j], centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
                 centers.append(centers_of_mass[j])
         if len(face) == 9:
-            return {"contours" : face, "relative_positions": relative_positions, 'centers': centers}
+            # Create list of dictionaries
+            # Sort into rows and columns by relative position
+            squares = []
+            for x in range(len(face)):
+                square = {}
+                square['id'] = ids[x]
+                square['contour'] = face[x]
+                square['relative_position'] = relative_positions[x]
+                square['center'] = centers[x]
+                squares.append(square)
+            squares = sorted(squares, key=lambda k: k['relative_position'][0])
+            #Split into 3 rows
+            rows = [sorted(squares[x:x+3],key= lambda k: k['relative_position'][1]) for x in range(0, len(squares), 3)]
+            # Could also skip
+            assert (rows[1][1]['id'] == i), f"The center square is not in the center, something went wrong!, got : {rows[1][1]['id']} expected {i}"
+            # TODO: Add other checks for cube face
+            return rows
         pass
     return None
