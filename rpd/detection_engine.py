@@ -15,6 +15,7 @@ class DetectionEngine:
         pass
 
     def process_frame(self, frame: np.ndarray):
+        img = frame
         assert(frame is not None, "frame is None")
         assert(frame.shape[0] == viewport_properties.HEIGHT, f"{frame.shape[0]} != {viewport_properties.HEIGHT}")
         assert(frame.shape[1] == viewport_properties.WIDTH, f"{frame.shape[1]} != {viewport_properties.WIDTH}")
@@ -29,8 +30,7 @@ class DetectionEngine:
         # contours = features.contours_min_area_rect(contours)
         self.last_frame = frame
         self.last_contours = contours
-        self.last_face = metafeatures.detect_face(contours)
-
+        self.last_face = metafeatures.detect_face(img, contours)
 
     def debug_frame(self, frame: np.ndarray) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
@@ -58,8 +58,8 @@ class DetectionEngine:
             axis = np.float32([[1,0,0], [0,1,0], [0,0,-1]]).reshape(-1,3)
             imgpts, jac = cv.projectPoints(axis, rotation_vector, translation_vector, camera_matrix, None)
             imgpts = imgpts.squeeze(axis=1)
-            img_2 = draw(img_2, center, imgpts)
-            cv.putText(img_2, f'{len(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+            # img_2 = draw(img_2, center, imgpts)
+            # cv.putText(img_2, f'{len(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         face = self.last_face
         if face is None:
             print("No face detected")
@@ -67,5 +67,6 @@ class DetectionEngine:
             for i, row in enumerate(face):
                 for j, square in enumerate(row):
                     img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
-                    cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
+                    # cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+                    cv.putText(img_2, f'{int(square.avg_hue)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         return img_2

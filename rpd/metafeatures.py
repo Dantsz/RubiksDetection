@@ -16,6 +16,7 @@ class FaceSquare:
     contour: np.ndarray
     center: Tuple[int,int]
     relative_position: Tuple[float,float]
+    avg_hue: float
 
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
@@ -53,8 +54,24 @@ class PreProcessingData:
             return None
         return (self.centers_of_mass[index], self.areas[index], self.orientation[index], self.normals[index])
 
-def detect_face(contours: List[np.ndarray]) -> List[List[FaceSquare]] | None:
+def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float,float]]) -> List[List[FaceSquare]]:
+    """Assemble the face data from the preprocessed data."""
+    squares: List[FaceSquare] = []
+    for idx, id in enumerate(face_ids):
+        assert contours_data[id] is not None, f"Contour {id} is None"
+        center, area, orientation, normal = contours_data[id]
+        square_img = features.contours_crop_and_reverse_perspective(frame, [contours[id]], (100,100))
+        avg_hue = color.color_average_hue(square_img[0])
+        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_hue)
+        squares.append(square)
+    squares = sorted(squares, key=lambda k: k.relative_position[0])
+    rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
+    return rows
+
+def detect_face(frame, contours: List[np.ndarray]) -> List[List[FaceSquare]] | None:
     """Find the face of the cube in the contours list."""
+
+    assert len(frame.shape) == 3, "The image must be in BGR format, "
     if len(contours) < 9: # We need at least 9 contours to form a cube for now
         return None
     camera_matrix = orientation.build_camera_matrix(vp.ORIENTATION_ESTIMATED_FOV, vp.WIDTH, vp.HEIGHT)
@@ -82,15 +99,7 @@ def detect_face(contours: List[np.ndarray]) -> List[List[FaceSquare]] | None:
                 relative_positions.append(features.contour_basis_change(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
                 centers.append(contours_data.centers_of_mass[j])
         if len(face) == 9:
-            # Create list of dictionaries
-            # Sort into rows and columns by relative position
-            squares :List[FaceSquare] = []
-            for x in range(len(face)):
-                square = FaceSquare(ids[x], face[x], centers[x], relative_positions[x])
-                squares.append(square)
-            squares = sorted(squares, key=lambda k: k.relative_position[0])
-            #Split into 3 rows
-            rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
+            rows = assemble_face_data(frame, contours, contours_data, ids, relative_positions)
             # Could also skip
             assert (rows[1][1].id == i), f"The center square is not in the center, something went wrong!, got : {rows[1][1].id} expected {i}"
             # TODO: Add other checks for cube face
