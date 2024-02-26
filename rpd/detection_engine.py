@@ -31,6 +31,7 @@ class DetectionEngine:
         self.last_contours = contours
         self.last_face = metafeatures.detect_face(contours)
 
+
     def debug_frame(self, frame: np.ndarray) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
         def draw(img, center, imgpts):
@@ -104,6 +105,6 @@ class DetectionEngine:
             # cv.drawContours(img_2, [face['contours'][0]], -1, (0,255,255), 3)
             for i, row in enumerate(face):
                 for j, square in enumerate(row):
-                    img_2 = cv.drawContours(img_2, [square['contour']], -1, (0,0,255), 3)
-                    cv.putText(img_2, f'{(i,j)}', square['center'], cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
+                    img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
+                    cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv.LINE_AA)
         return img_2
