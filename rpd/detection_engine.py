@@ -59,7 +59,7 @@ class DetectionEngine:
             imgpts, jac = cv.projectPoints(axis, rotation_vector, translation_vector, camera_matrix, None)
             imgpts = imgpts.squeeze(axis=1)
             # img_2 = draw(img_2, center, imgpts)
-            cv.putText(img_2, f'{cv.contourArea(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+            # cv.putText(img_2, f'{cv.contourArea(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         face = self.last_face
         if face is None:
             print("No face detected")
@@ -68,6 +68,6 @@ class DetectionEngine:
                 for j, square in enumerate(row):
                     img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
                     # cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
-                    # cv.putText(img_2, f'{int(color.color_hue_metric(square.avg_hue))}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+                    cv.putText(img_2, f'{int(color.color_hue_metric(square.avg_hue))}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     # cv.putText(img_2, f'{cv.contourArea(square.contour)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         return img_2
