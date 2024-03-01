@@ -16,7 +16,7 @@ class FaceSquare:
     contour: np.ndarray
     center: Tuple[int,int]
     relative_position: Tuple[float,float]
-    avg_hue_sat: Tuple[float,float]
+    avg_lab: Tuple[float,float,float]
 
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
@@ -61,8 +61,8 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         assert contours_data[id] is not None, f"Contour {id} is None"
         center, area, orientation, normal = contours_data[id]
         square_img = features.contours_crop_and_reverse_perspective(frame, [contours[id]], (100,100))
-        avg_hue_sat = color.color_average_hue_saturation(square_img[0])
-        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_hue_sat)
+        avg_lab = color.color_avg_lab(square_img[0])
+        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
     rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
