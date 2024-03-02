@@ -68,6 +68,7 @@ class DetectionEngine:
                 for j, square in enumerate(row):
                     img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
                     # cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
-                    cv.putText(img_2, f'{(int(square.avg_hue_sat[0]), int(square.avg_hue_sat[1]))}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+                    color_met = square.avg_lab
+                    cv.putText(img_2, f'{(int(color_met[1]), int(color_met[2]))}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     # cv.putText(img_2, f'{cv.contourArea(square.contour)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         return img_2

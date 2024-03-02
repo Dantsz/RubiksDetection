@@ -1,3 +1,4 @@
+from enum import Enum
 import cv2 as cv
 import numpy as np
 
@@ -9,6 +10,15 @@ from . import orientation
 from . import features
 from . import color
 
+class SquareColor(Enum):
+    """Enum to represent the color of a square in a face of the cube."""
+    Unknown = 0
+    WHITE = 1
+    YELLOW = 2
+    BLUE = 3
+    GREEN = 4
+    RED = 5
+    ORANGE = 6
 @dataclass
 class FaceSquare:
     """Dataclass to store the information of a square in a face of the cube. The face is a 3x3 grid of FaceSquares."""
@@ -17,6 +27,7 @@ class FaceSquare:
     center: Tuple[int,int]
     relative_position: Tuple[float,float]
     avg_lab: Tuple[float,float,float]
+    color: SquareColor
 
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
@@ -62,7 +73,7 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         center, area, orientation, normal = contours_data[id]
         square_img = features.contours_crop_and_reverse_perspective(frame, [contours[id]], (100,100))
         avg_lab = color.color_avg_lab(square_img[0])
-        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
+        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab, SquareColor.Unknown)
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
     rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
