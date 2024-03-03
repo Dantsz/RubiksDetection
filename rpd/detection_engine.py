@@ -71,4 +71,9 @@ class DetectionEngine:
                     color_met = square.avg_lab
                     cv.putText(img_2, f'{(int(color_met[1]), int(color_met[2]))}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     # cv.putText(img_2, f'{cv.contourArea(square.contour)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+                    color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
+                    color = (float(color[0]), float(color[1]), float(color[2]))
+                    rectangle_pos = (i * 25, j * 25)
+                    img_2 = cv.rectangle(img_2, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
+
         return img_2
