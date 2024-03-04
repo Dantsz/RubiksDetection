@@ -62,7 +62,7 @@ class DetectionEngine:
             # cv.putText(img_2, f'{cv.contourArea(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         face = self.last_face
         if face is None:
-            print("No face detected")
+            pass
         else:
             for i, row in enumerate(face):
                 for j, square in enumerate(row):
