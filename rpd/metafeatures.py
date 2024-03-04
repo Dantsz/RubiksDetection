@@ -1,6 +1,7 @@
 from enum import Enum
 import cv2 as cv
 import numpy as np
+import math
 
 from dataclasses import dataclass
 from typing import List, Tuple
@@ -76,12 +77,13 @@ class PreProcessingData:
             self.areas.append(cv.contourArea(contour))
             self.normals.append(normal_vector)
         pass
-    def __getitem__(self, index: int) -> Tuple[Tuple[int,int], float, Tuple[np.ndarray,np.ndarray, np.ndarray], np.ndarray] | None:
+
+    def __getitem__(self, index: int) -> Tuple[Tuple[int, int], float, Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray] | None:
         if (self.centers_of_mass is None or self.areas is None or self.orientation is None or self.normals is None):
             return None
         return (self.centers_of_mass[index], self.areas[index], self.orientation[index], self.normals[index])
 
-def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float,float]]) -> List[List[FaceSquare]]:
+def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]]) -> List[List[FaceSquare]]:
     """Assemble the face data from the preprocessed data."""
     squares: List[FaceSquare] = []
     for idx, id in enumerate(face_ids):
@@ -96,7 +98,29 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
     return rows
 
 def check_face_integrity(face: List[List[FaceSquare]], center_index) -> bool:
+    # TODO: MAKE RETURN FALSE INSTEAD OF ASSERT
     assert (face[1][1].id == center_index), f"The center square is not in the center, something went wrong!, got : {face[1][1].id} expected {center_index}"
+    # CHECKS for the angles between the face cross
+    def cos_angle(vec_1, vec_2):
+        return np.dot(vec_1, vec_2)/(np.linalg.norm(vec_1) * np.linalg.norm(vec_2))
+    point_up = np.array(face[0][1].center)
+    point_down = np.array(face[2][1].center)
+    point_center = np.array(face[1][1].center)
+    point_right = np.array(face[1][0].center)
+    point_left = np.array(face[1][2].center)
+    vec_center_up = point_up - point_center
+    vec_center_right = point_right - point_center
+    vec_center_down = point_down - point_center
+    vec_center_left = point_left - point_center
+    cos_angle_up_right = cos_angle(vec_center_up, vec_center_right)
+    cos_angle_up_left = cos_angle(vec_center_up, vec_center_left)
+    cos_angle_down_right = cos_angle(vec_center_down, vec_center_right)
+    cos_angle_down_left = cos_angle(vec_center_down, vec_center_left)
+    cos_angles = [cos_angle_up_left, cos_angle_up_right, cos_angle_down_left, cos_angle_down_right]
+    ANGLE_BOUNDS = (-0.5, 0.5)
+    for idx, cos_angle in enumerate(cos_angles):
+        # TODO: ALSO MAKE return false
+        assert cos_angle > ANGLE_BOUNDS[0] and cos_angle < ANGLE_BOUNDS[1], f"The angle {idx} is not between 60 and 120 degrees, angle: {math.degrees(math.acos(cos_angle))}"
     # TODO: Add other checks for cube face
     return True
 
@@ -125,7 +149,7 @@ def detect_face(frame, contours: List[np.ndarray]) -> List[List[FaceSquare]] | N
             distance = np.sqrt((contours_data.centers_of_mass[i][0] - contours_data.centers_of_mass[j][0])**2 + (contours_data.centers_of_mass[i][1] - contours_data.centers_of_mass[j][1])**2)
             # If the distance is less than 1/3 of the perimeter of the contours, then they are neighbors
             if distance < (cv.arcLength(contours[i], True)/3 + cv.arcLength(contours[j], True)/3) and features.contorus_area_similarity(contours[i], contours[j], 0.025):
-                #Find position of the neighbor contour relative to the center contour
+                # Find position of the neighbor contour relative to the center contour
                 face.append(contours[j])
                 ids.append(j)
                 relative_positions.append(features.contour_basis_change(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
