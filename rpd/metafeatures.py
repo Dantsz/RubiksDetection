@@ -117,7 +117,7 @@ def check_face_integrity(face: List[List[FaceSquare]], center_index) -> bool:
     cos_angle_down_right = cos_angle(vec_center_down, vec_center_right)
     cos_angle_down_left = cos_angle(vec_center_down, vec_center_left)
     cos_angles = [cos_angle_up_left, cos_angle_up_right, cos_angle_down_left, cos_angle_down_right]
-    ANGLE_BOUNDS = (-0.5, 0.5)
+    ANGLE_BOUNDS = (-0.4, 0.4)
     for idx, cos_angle in enumerate(cos_angles):
         # TODO: ALSO MAKE return false
         assert cos_angle > ANGLE_BOUNDS[0] and cos_angle < ANGLE_BOUNDS[1], f"The angle {idx} is not between 60 and 120 degrees, angle: {math.degrees(math.acos(cos_angle))}"
