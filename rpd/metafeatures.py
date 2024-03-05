@@ -3,8 +3,8 @@ import cv2 as cv
 import numpy as np
 import math
 
-from dataclasses import dataclass
-from typing import List, Tuple
+from dataclasses import asdict, dataclass
+from typing import List, Tuple, Union
 
 from . import viewport_properties as vp
 from . import orientation
@@ -43,6 +43,24 @@ class FaceSquare:
     avg_lab: Tuple[float, float, float]
     color: SquareColor
 
+    def to_dict(self):
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, dict):
+        dict['contour'] = np.array(dict['contour'])
+        return cls(**dict)
+
+@dataclass
+class Face:
+    """Dataclass to store the information of a face of the cube."""
+    faces: List[List[FaceSquare]]
+
+    def __getitem__(self, index: Union[int, Tuple[int, int]]) -> FaceSquare:
+        if isinstance(index, tuple):
+            return self.faces[index[0]][index[1]]
+        else:
+            return self.faces[index]
 
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
@@ -83,7 +101,7 @@ class PreProcessingData:
             return None
         return (self.centers_of_mass[index], self.areas[index], self.orientation[index], self.normals[index])
 
-def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]]) -> List[List[FaceSquare]]:
+def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]]) -> Face:
     """Assemble the face data from the preprocessed data."""
     squares: List[FaceSquare] = []
     for idx, id in enumerate(face_ids):
@@ -95,9 +113,9 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
     rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
-    return rows
+    return Face(rows)
 
-def check_face_integrity(face: List[List[FaceSquare]], center_index) -> bool:
+def check_face_integrity(face: Face, center_index) -> bool:
     # TODO: MAKE RETURN FALSE INSTEAD OF ASSERT
     assert (face[1][1].id == center_index), f"The center square is not in the center, something went wrong!, got : {face[1][1].id} expected {center_index}"
     # CHECKS for the angles between the face cross
@@ -124,7 +142,7 @@ def check_face_integrity(face: List[List[FaceSquare]], center_index) -> bool:
     # TODO: Add other checks for cube face
     return True
 
-def detect_face(frame, contours: List[np.ndarray]) -> List[List[FaceSquare]] | None:
+def detect_face(frame, contours: List[np.ndarray]) -> Face | None:
     """Find the face of the cube in the contours list."""
 
     assert len(frame.shape) == 3, "The image must be in BGR format, "
