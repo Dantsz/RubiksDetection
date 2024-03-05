@@ -2,6 +2,7 @@ from enum import Enum
 import cv2 as cv
 import numpy as np
 import math
+import json
 
 from dataclasses import asdict, dataclass
 from typing import List, Tuple, Union
@@ -12,7 +13,7 @@ from . import features
 from . import color
 
 
-class SquareColor(Enum):
+class SquareColor(str, Enum):
     """Enum to represent the color of a square in a face of the cube."""
     Unknown = 0
     WHITE = 1
@@ -61,6 +62,16 @@ class Face:
             return self.faces[index[0]][index[1]]
         else:
             return self.faces[index]
+class FaceEncoder(json.JSONEncoder):
+    """ Special json encoder for numpy types """
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
