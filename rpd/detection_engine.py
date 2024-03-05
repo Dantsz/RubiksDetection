@@ -2,6 +2,7 @@ from dataclasses import asdict
 import json
 import logging
 import math
+import pickle
 import numpy as np
 import cv2 as cv
 
@@ -77,8 +78,8 @@ class DetectionEngine:
                     color = (float(color[0]), float(color[1]), float(color[2]))
                     rectangle_pos = (i * 25, j * 25)
                     img_2 = cv.rectangle(img_2, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
-            with open('face_data.json', 'a') as f:
-                json.dump(asdict(face), f, cls=metafeatures.FaceEncoder)
+            with open('face_data.pickle', 'wb') as f:
+                pickle.dump(face, f)
 
 
         return img_2

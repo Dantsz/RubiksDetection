@@ -62,16 +62,6 @@ class Face:
             return self.faces[index[0]][index[1]]
         else:
             return self.faces[index]
-class FaceEncoder(json.JSONEncoder):
-    """ Special json encoder for numpy types """
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
 
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
