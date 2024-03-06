@@ -1,6 +1,7 @@
 from enum import Enum
 
 from . import metafeatures
+import logging
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,6 +24,7 @@ class RubikStateEngine:
 
     def __init__(self):
         self.faces = []
+        self.last_centers = []
         pass
 
     def consume_face(self, face: metafeatures.Face):
@@ -65,9 +67,10 @@ class RubikStateEngine:
         # Apply k-means to the to k-means to the faces to identify the colors, using the center square of each face as seed point
         criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 0.2)
         _, labels, centers = cv.kmeans(all_squares_avg_lab, 6, None, criteria, 1, cv.KMEANS_RANDOM_CENTERS)
-        plt.scatter(all_squares_avg_lab[:, 0], all_squares_avg_lab[:, 1], c=labels, s=50, cmap='viridis')
-        plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
-        plt.scatter(center_squares_avg_lab[:, 0], center_squares_avg_lab[:, 1], c='red', s=100, alpha=0.5)
+        # plt.scatter(all_squares_avg_lab[:, 0], all_squares_avg_lab[:, 1], c=labels, s=50, cmap='viridis')
+        # plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
+        # plt.scatter(center_squares_avg_lab[:, 0], center_squares_avg_lab[:, 1], c='red', s=100, alpha=0.5)
+        self.last_centers = centers
         for x, face in enumerate(self.faces):
             face["labels"] = []
             for i, square_row in enumerate(face["data"].faces):
@@ -78,11 +81,13 @@ class RubikStateEngine:
 
 
 
-    def debug_image(self, dimensions: tuple[int, int] = (800, 600)):
+    def debug_image(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""
+        logging.info("Creating debug image")
         # Createa a black image
         img = np.zeros((dimensions[1], dimensions[0], 3), np.uint8)
         # Draw the faces
+        avg_points = []
         for idx, face in enumerate(self.faces):
             for i, row in enumerate(face["data"]):
                 for j, square in enumerate(row):
@@ -92,7 +97,22 @@ class RubikStateEngine:
                     rectangle_pos = (idx * 100 + i * 25, j * 25)
                     img = cv.rectangle(img, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
                     img = cv.putText(img, f"{face['labels'][i][j]}", (rectangle_pos[0] + 5, rectangle_pos[1] + 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
+                    avg_points.append(face["data"][i][j].avg_lab)
+        x = [x[1] for x in avg_points]
+        y = [x[2] for x in avg_points]
+        plt.scatter(x, y)
 
+        x = [x[0] for x in self.last_centers]
+        y = [x[1] for x in self.last_centers]
+        plt.scatter(x, y, c='red')
+
+        fig = plt.gcf()
+        fig.canvas.draw()
+        plot_img = np.array(fig.canvas.renderer.buffer_rgba())
+        plot_img = cv.cvtColor(plot_img, cv.COLOR_RGBA2BGR)
+        plot_img = cv.resize(plot_img, (800,600))
+
+        img =  cv.vconcat([img, plot_img])
         return img
 
     def reset (self):
