@@ -12,18 +12,6 @@ from . import orientation
 from . import features
 from . import color
 
-
-class SquareColor(str, Enum):
-    """Enum to represent the color of a square in a face of the cube."""
-    Unknown = 0
-    WHITE = 1
-    YELLOW = 2
-    BLUE = 3
-    GREEN = 4
-    RED = 5
-    ORANGE = 6
-
-
 @dataclass
 class FaceSquare:
     """Dataclass to store the information of a square in a face of the cube.
@@ -42,7 +30,6 @@ class FaceSquare:
     center: Tuple[int, int]
     relative_position: Tuple[float, float]
     avg_lab: Tuple[float, float, float]
-    color: SquareColor
 
     def to_dict(self):
         return asdict(self)
@@ -110,7 +97,7 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         center, area, orientation, normal = contours_data[id]
         square_img = features.contours_crop_and_reverse_perspective(frame, [contours[id]], (100,100))
         avg_lab = color.color_avg_lab(square_img[0])
-        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab, SquareColor.Unknown)
+        square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
     rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
@@ -139,7 +126,7 @@ def check_face_integrity(face: Face, center_index) -> bool:
     ANGLE_BOUNDS = (-0.4, 0.4)
     for idx, cos_angle in enumerate(cos_angles):
         # TODO: ALSO MAKE return false
-        assert cos_angle > ANGLE_BOUNDS[0] and cos_angle < ANGLE_BOUNDS[1], f"The angle {idx} is not between 60 and 120 degrees, angle: {math.degrees(math.acos(cos_angle))}"
+        assert cos_angle > ANGLE_BOUNDS[0] and cos_angle < ANGLE_BOUNDS[1], f"The angle {idx} is not between 66 and 113 degrees, angle: {math.degrees(math.acos(cos_angle))}"
     # TODO: Add other checks for cube face
     return True
 
