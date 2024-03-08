@@ -15,6 +15,7 @@ from . import color
 class DetectionEngine:
     def __init__(self):
         logging.info("initializing DetectionEngine")
+        self.last_face = None
         pass
 
     def process_frame(self, frame: np.ndarray):
@@ -33,7 +34,9 @@ class DetectionEngine:
         # contours = features.contours_min_area_rect(contours)
         self.last_frame = frame
         self.last_contours = contours
-        self.last_face = metafeatures.detect_face(img, contours)
+        face = metafeatures.detect_face(img, contours)
+        if face is not None:
+            self.last_face = face
 
     def debug_frame(self, frame: np.ndarray) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
