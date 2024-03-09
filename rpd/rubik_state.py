@@ -136,3 +136,4 @@ class RubikStateEngine:
 
     def reset (self):
         self.faces = []
+        self.last_centers = []
