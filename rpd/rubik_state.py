@@ -27,8 +27,26 @@ def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: li
     # center_squares_avg_lab = np.float32(centers)
     # Apply k-means to the to k-means to the faces to identify the colors, using the center square of each face as seed point
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 0.2)
-    _, labels, centers = cv.kmeans(squares, 6, None, criteria, 1, cv.KMEANS_RANDOM_CENTERS)
+    _, labels, centers = cv.kmeans(squares, 6, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
+    return labels, centers
+
+def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> list[int]:
+    """Classifies the squares of the cube state using the closest center to each square.
+
+    The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
+    The return value is a list of integers representing a label for each square, in order that they're represented in the squares list.
+    """
+    labels = []
+    for square in squares:
+        min_distance = float('inf')
+        label = -1
+        for i, center in enumerate(centers):
+            distance = np.linalg.norm(np.array(center) - np.array(square))
+            if distance < min_distance:
+                min_distance = distance
+                label = i
+        labels.append([label])
     return labels, centers
 
 class RubikStateEngine:
@@ -79,7 +97,7 @@ class RubikStateEngine:
         assert all_squares_avg_lab.shape[0] == 54, f"something went wrong finding the squares, got {all_squares_avg_lab.shape[0]} expected 54"
         assert center_squares_avg_lab.shape[0] == 6, f"something went wrong finding the center squares, got {center_squares_avg_lab.shape[0]} expected 6"
 
-        labels, centers = classify_squares_k_means(all_squares_avg_lab, center_squares_avg_lab)
+        labels, centers = classify_squares_closest(all_squares_avg_lab, center_squares_avg_lab)
 
         self.last_centers = centers
         for x, face in enumerate(self.faces):
@@ -87,7 +105,7 @@ class RubikStateEngine:
             for i, square_row in enumerate(face["data"].faces):
                 face["labels"].append([])
                 for j, square in enumerate(square_row):
-                    index = len(self.faces) * x + len(face["data"].faces) * i + j
+                    index = 9 * x + len(face["data"].faces) * i + j
                     face["labels"][i].append(labels[index][0])
 
 
