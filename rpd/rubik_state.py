@@ -1,10 +1,12 @@
 from enum import Enum
 
 from . import metafeatures
+
 import logging
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+from pydantic import BaseModel
 
 class SquareColor(str, Enum):
     """Enum to represent the color of a square in a face of the cube."""
@@ -56,7 +58,8 @@ class RubikStateEngine:
     """
 
     def __init__(self):
-        self.faces = []
+        self.face_data: list[metafeatures.FaceSquare] = []
+        self.face_labels: list[list[list[int]]] = []
         self.last_centers = []
         pass
 
@@ -64,18 +67,12 @@ class RubikStateEngine:
         """Consumes a face from the detection engine and updates the state of the cube."""
         if face is None:
             raise ValueError("The face is None")
-        if len(self.faces) == 6:
+        if len(self.face_data) == 6:
             raise ValueError("The cube is already complete")
-        self.faces.append(
-            {
-                "rotation": 0,
-                "color": SquareColor.Unknown, # Means the color of the center square
-                "data": face
-            }
-        )
+        self.face_data.append(face)
     def is_complete(self):
         """Returns True if the cube is complete, False otherwise."""
-        return len(self.faces) == 6
+        return len(self.face_data) == 6
 
     def fit(self):
         """Identifies the colors of the faces and rotates the faces to make a valid cube."""
@@ -83,8 +80,8 @@ class RubikStateEngine:
             raise ValueError("The cube is not complete")
         all_squares_avg_lab: list[tuple[float, float, float]] = []
         center_squares_avg_lab: list[tuple[float, float, float]] = []
-        for face in self.faces:
-            for i, square_row in enumerate(face["data"]):
+        for face in self.face_data:
+            for i, square_row in enumerate(face):
                 for j, square in enumerate(square_row):
                     all_squares_avg_lab.append(square.avg_lab)
                     if i == 1 and j == 1:
@@ -97,16 +94,16 @@ class RubikStateEngine:
         assert all_squares_avg_lab.shape[0] == 54, f"something went wrong finding the squares, got {all_squares_avg_lab.shape[0]} expected 54"
         assert center_squares_avg_lab.shape[0] == 6, f"something went wrong finding the center squares, got {center_squares_avg_lab.shape[0]} expected 6"
 
-        labels, centers = classify_squares_closest(all_squares_avg_lab, center_squares_avg_lab)
+        labels, centers = classify_squares_k_means(all_squares_avg_lab, center_squares_avg_lab)
 
         self.last_centers = centers
-        for x, face in enumerate(self.faces):
-            face["labels"] = []
-            for i, square_row in enumerate(face["data"].faces):
-                face["labels"].append([])
+        for x, face in enumerate(self.face_data):
+            self.face_labels.append([])
+            for i, square_row in enumerate(face.faces):
+                self.face_labels[x].append([])
                 for j, square in enumerate(square_row):
-                    index = 9 * x + len(face["data"].faces) * i + j
-                    face["labels"][i].append(labels[index][0])
+                    index = 9 * x + len(face.faces) * i + j
+                    self.face_labels[x][i].append(labels[index][0])
 
 
 
@@ -119,16 +116,16 @@ class RubikStateEngine:
         # Draw the faces
         avg_points = []
         colors = []
-        for idx, face in enumerate(self.faces):
-            for i, row in enumerate(face["data"]):
+        for idx, face in enumerate(self.face_data):
+            for i, row in enumerate(face):
                 for j, square in enumerate(row):
                     color_met = square.avg_lab
                     color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
                     color = (float(color[0]), float(color[1]), float(color[2]))
                     rectangle_pos = (idx * 100 + i * 25, j * 25)
                     img = cv.rectangle(img, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
-                    img = cv.putText(img, f"{face['labels'][i][j]}", (rectangle_pos[0] + 5, rectangle_pos[1] + 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
-                    avg_points.append(face["data"][i][j].avg_lab)
+                    img = cv.putText(img, f"{self.face_labels[idx][i][j]}", (rectangle_pos[0] + 5, rectangle_pos[1] + 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
+                    avg_points.append(face[i][j].avg_lab)
 
                     color_rgb = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2RGB)[0][0]
                     color_rgb = (float(color[0]), float(color[1]), float(color[2]))
@@ -153,5 +150,5 @@ class RubikStateEngine:
         return img
 
     def reset (self):
-        self.faces = []
+        self.face_data = []
         self.last_centers = []
