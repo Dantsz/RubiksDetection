@@ -19,7 +19,7 @@ def check_label_consistency(labels: np.ndarray) -> bool:
             return False
     return True
 
-def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[list[int], list[tuple[int,int,int]]]:
+def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
     """Classifies the squares of the cube state using k-means clustering.
 
     The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
@@ -34,7 +34,7 @@ def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: li
 
     return labels, centers
 
-def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[list[int],list[tuple[int,int,int]]]:
+def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
     """Classifies the squares of the cube state using the closest center to each square.
 
     The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
@@ -68,8 +68,8 @@ def fit_colors_to_labels(labels: list[int], centers: list[tuple[float, float, fl
         colors.append(color)
     return colors
 
-class RubikStateEngine:
-    """Represents the state of a Rubik's cube.
+class LabelingEngine:
+    """Labels the state of the cube.
 
     It can be fed with the faces from the detection engine and it will keep track of the state of the cube.
     """
