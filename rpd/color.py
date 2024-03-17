@@ -1,9 +1,31 @@
 """Color estimation for Rubik's Cube faces.
 """
 
+from enum import Enum
 from typing import Tuple
 import cv2 as cv
 import numpy as np
+
+class SquareColor(Enum):
+    """Enum to represent the color of a square in a face of the cube."""
+    WHITE = 0
+    YELLOW = 1
+    BLUE = 2
+    GREEN = 3
+    RED = 4
+    ORANGE = 5
+    Unknown = 6
+
+# LAB values for the standard rubik's cube colors
+# Scaled 0-255 because opencv
+reference_colors = np.array([
+    [127, 127],
+    [110, 185],
+    [127, 100],
+    [80, 155],
+    [160, 146],
+    [200, 178],
+])
 
 def color_avg_lab(img: np.ndarray) -> Tuple[float, float, float]:
     '''Computes the average L*a*b* of a contour in an image.'''

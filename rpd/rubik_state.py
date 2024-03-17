@@ -7,18 +7,19 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 from pydantic import BaseModel
+from .color import SquareColor, reference_colors
 
-class SquareColor(str, Enum):
-    """Enum to represent the color of a square in a face of the cube."""
-    Unknown = 0
-    WHITE = 1
-    YELLOW = 2
-    BLUE = 3
-    GREEN = 4
-    RED = 5
-    ORANGE = 6
+def check_label_consistency(labels: np.ndarray) -> bool:
+    """Checks if the labels make sense.
 
-def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> list[int]:
+        Each label must appear exactly 9 times in the list.
+    """
+    for i in range(6):
+        if np.sum(labels == i) != 9:
+            return False
+    return True
+
+def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[list[int], list[tuple[int,int,int]]]:
     """Classifies the squares of the cube state using k-means clustering.
 
     The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
@@ -33,7 +34,7 @@ def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: li
 
     return labels, centers
 
-def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> list[int]:
+def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[list[int],list[tuple[int,int,int]]]:
     """Classifies the squares of the cube state using the closest center to each square.
 
     The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
@@ -51,6 +52,22 @@ def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: li
         labels.append([label])
     return labels, centers
 
+def fit_colors_to_labels(labels: list[int], centers: list[tuple[float, float, float]]) -> list[SquareColor]:
+    """Fits the labels to the closest color in the reference colors.
+
+    """
+    colors: list[SquareColor] = []
+    for center in centers:
+        min_distance = float('inf')
+        color = SquareColor.Unknown
+        for i, ref_color in enumerate(reference_colors) :
+            distance = np.linalg.norm(np.array(ref_color) - np.array(center))
+            if distance < min_distance and SquareColor(i) not in colors:
+                min_distance = distance
+                color = SquareColor(i)
+        colors.append(color)
+    return colors
+
 class RubikStateEngine:
     """Represents the state of a Rubik's cube.
 
@@ -61,6 +78,8 @@ class RubikStateEngine:
         self.face_data: list[metafeatures.FaceSquare] = []
         self.face_labels: list[list[list[int]]] = []
         self.last_centers = []
+        self.colors: list[SquareColor] = []
+        self.center_labels: list[int] = []
         pass
 
     def consume_face(self, face: metafeatures.Face):
@@ -70,6 +89,7 @@ class RubikStateEngine:
         if len(self.face_data) == 6:
             raise ValueError("The cube is already complete")
         self.face_data.append(face)
+
     def is_complete(self):
         """Returns True if the cube is complete, False otherwise."""
         return len(self.face_data) == 6
@@ -96,6 +116,11 @@ class RubikStateEngine:
 
         labels, centers = classify_squares_k_means(all_squares_avg_lab, center_squares_avg_lab)
 
+        if check_label_consistency(labels):
+            logging.info("The labels are consistent")
+        else:
+            logging.warning("The labels are not consistent")
+
         self.last_centers = centers
         for x, face in enumerate(self.face_data):
             self.face_labels.append([])
@@ -104,8 +129,14 @@ class RubikStateEngine:
                 for j, square in enumerate(square_row):
                     index = 9 * x + len(face.faces) * i + j
                     self.face_labels[x][i].append(labels[index][0])
+                    if i == 1 and j == 1:
+                        self.center_labels.append(labels[index][0])
 
+        self.colors = fit_colors_to_labels(labels, self.last_centers)
 
+    def stateString(self) -> str:
+        if self.is_complete():
+            raise ValueError("The cube is not complete")
 
     def debug_image(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""
@@ -140,6 +171,13 @@ class RubikStateEngine:
         y = [x[1] for x in self.last_centers]
         plt.scatter(x, y, c='red')
 
+        for fi, face in enumerate(self.face_data):
+            for i, square_row in enumerate(face):
+                for j, square in enumerate(square_row):
+                    if i == 1 and j == 1:
+                        plt.annotate(self.face_labels[fi][i][j], (square.avg_lab[1], square.avg_lab[2]), textcoords="offset points", xytext=(0,10), ha='center')
+
+
         fig = plt.gcf()
         fig.canvas.draw()
         plot_img = np.array(fig.canvas.renderer.buffer_rgba())
@@ -147,6 +185,9 @@ class RubikStateEngine:
         plot_img = cv.resize(plot_img, (800,600))
 
         img =  cv.vconcat([img, plot_img])
+        for i, col in enumerate(self.colors):
+            print(f"Label {self.center_labels[i]} color: {self.colors[self.center_labels[i]]}")
+
         return img
 
     def reset (self):
