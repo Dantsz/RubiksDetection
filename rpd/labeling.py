@@ -6,6 +6,8 @@ import logging
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+logging.getLogger("PIL").setLevel(logging.INFO)
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 from pydantic import BaseModel
 from .color import SquareColor, reference_colors
 
@@ -15,7 +17,8 @@ def check_label_consistency(labels: np.ndarray) -> bool:
         Each label must appear exactly 9 times in the list.
     """
     for i in range(6):
-        if np.sum(labels == i) != 9:
+        sm = np.sum(labels == i)
+        if sm != 9:
             return False
     return True
 
@@ -50,14 +53,14 @@ def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: li
                 min_distance = distance
                 label = i
         labels.append([label])
-    return labels, centers
+    return np.array(labels), centers
 
-def fit_colors_to_labels(labels: list[int], centers: list[tuple[float, float, float]]) -> list[SquareColor]:
+def fit_colors_to_labels(labels: list[int], centers: np.ndarray) -> list[SquareColor]:
     """Fits the labels to the closest color in the reference colors.
 
     """
     colors: list[SquareColor] = []
-    for center in centers:
+    for center in centers[: , 1:]:
         min_distance = float('inf')
         color = SquareColor.Unknown
         for i, ref_color in enumerate(reference_colors) :
@@ -108,13 +111,11 @@ class LabelingEngine:
                         center_squares_avg_lab.append(square.avg_lab)
 
         all_squares_avg_lab = np.array(all_squares_avg_lab)
-        all_squares_avg_lab = all_squares_avg_lab[:, 1:]
         center_squares_avg_lab = np.array(center_squares_avg_lab)
-        center_squares_avg_lab = center_squares_avg_lab[:, 1:]
         assert all_squares_avg_lab.shape[0] == 54, f"something went wrong finding the squares, got {all_squares_avg_lab.shape[0]} expected 54"
         assert center_squares_avg_lab.shape[0] == 6, f"something went wrong finding the center squares, got {center_squares_avg_lab.shape[0]} expected 6"
 
-        labels, centers = classify_squares_k_means(all_squares_avg_lab, center_squares_avg_lab)
+        labels, centers = classify_squares_closest(all_squares_avg_lab, center_squares_avg_lab)
 
         if check_label_consistency(labels):
             logging.info("The labels are consistent")
@@ -167,8 +168,8 @@ class LabelingEngine:
         normalized_colors = np.array(colors) / 255
         plt.scatter(x, y,c=normalized_colors)
 
-        x = [x[0] for x in self.last_centers]
-        y = [x[1] for x in self.last_centers]
+        x = [x[1] for x in self.last_centers]
+        y = [x[2] for x in self.last_centers]
         plt.scatter(x, y, c='red')
 
         for fi, face in enumerate(self.face_data):
