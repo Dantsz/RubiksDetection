@@ -57,7 +57,6 @@ def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: li
 
 def fit_colors_to_labels(labels: list[int], centers: np.ndarray) -> list[SquareColor]:
     """Fits the labels to the closest color in the reference colors.
-
     """
     colors: list[SquareColor] = []
     for center in centers[: , 1:]:
@@ -123,17 +122,17 @@ class LabelingEngine:
             logging.warning("The labels are not consistent")
 
         self.last_centers = centers
+        self.colors = fit_colors_to_labels(labels, self.last_centers)
         for x, face in enumerate(self.face_data):
             self.face_labels.append([])
             for i, square_row in enumerate(face.faces):
                 self.face_labels[x].append([])
                 for j, square in enumerate(square_row):
                     index = 9 * x + len(face.faces) * i + j
-                    self.face_labels[x][i].append(labels[index][0])
+                    self.face_labels[x][i].append(self.colors[labels[index][0]])
                     if i == 1 and j == 1:
-                        self.center_labels.append(labels[index][0])
+                        self.center_labels.append(self.colors[labels[index][0]])
 
-        self.colors = fit_colors_to_labels(labels, self.last_centers)
 
     def stateString(self) -> str:
         if self.is_complete():
@@ -156,7 +155,7 @@ class LabelingEngine:
                     color = (float(color[0]), float(color[1]), float(color[2]))
                     rectangle_pos = (idx * 100 + i * 25, j * 25)
                     img = cv.rectangle(img, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
-                    img = cv.putText(img, f"{self.face_labels[idx][i][j]}", (rectangle_pos[0] + 5, rectangle_pos[1] + 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
+                    img = cv.putText(img, f"{int(self.face_labels[idx][i][j])}", (rectangle_pos[0] + 5, rectangle_pos[1] + 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
                     avg_points.append(face[i][j].avg_lab)
 
                     color_rgb = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2RGB)[0][0]
@@ -176,7 +175,7 @@ class LabelingEngine:
             for i, square_row in enumerate(face):
                 for j, square in enumerate(square_row):
                     if i == 1 and j == 1:
-                        plt.annotate(self.face_labels[fi][i][j], (square.avg_lab[1], square.avg_lab[2]), textcoords="offset points", xytext=(0,10), ha='center')
+                        plt.annotate(self.face_labels[fi][i][j].name, (square.avg_lab[1], square.avg_lab[2]), textcoords="offset points", xytext=(0,10), ha='center')
 
 
         fig = plt.gcf()
@@ -186,8 +185,6 @@ class LabelingEngine:
         plot_img = cv.resize(plot_img, (800,600))
 
         img =  cv.vconcat([img, plot_img])
-        for i, col in enumerate(self.colors):
-            print(f"Label {self.center_labels[i]} color: {self.colors[self.center_labels[i]]}")
 
         return img
 

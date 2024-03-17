@@ -1,12 +1,12 @@
 """Color estimation for Rubik's Cube faces.
 """
 
-from enum import Enum
+from enum import IntEnum
 from typing import Tuple
 import cv2 as cv
 import numpy as np
 
-class SquareColor(Enum):
+class SquareColor(IntEnum):
     """Enum to represent the color of a square in a face of the cube."""
     WHITE = 0
     YELLOW = 1
