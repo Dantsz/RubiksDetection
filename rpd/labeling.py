@@ -78,7 +78,7 @@ class LabelingEngine:
 
     def __init__(self):
         self.face_data: list[metafeatures.FaceSquare] = []
-        self.face_labels: list[list[list[int]]] = []
+        self.face_labels: list[list[list[SquareColor]]] = []
         self.last_centers = []
         self.colors: list[SquareColor] = []
         self.center_labels: list[int] = []
