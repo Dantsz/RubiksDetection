@@ -162,7 +162,7 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
             # Find the distance between the centers of mass
             distance = np.sqrt((contours_data.centers_of_mass[i][0] - contours_data.centers_of_mass[j][0])**2 + (contours_data.centers_of_mass[i][1] - contours_data.centers_of_mass[j][1])**2)
             # If the distance is less than 1/3 of the perimeter of the contours, then they are neighbors
-            if distance < (cv.arcLength(contours[i], True)/3 + cv.arcLength(contours[j], True)/3) and features.contorus_area_similarity(contours[i], contours[j], 0.025):
+            if distance < (cv.arcLength(contours[i], True)/3 + cv.arcLength(contours[j], True)/3) and features.contorus_area_similarity(contours[i], contours[j], 0.15):
                 # Find position of the neighbor contour relative to the center contour
                 face.append(contours[j])
                 ids.append(j)

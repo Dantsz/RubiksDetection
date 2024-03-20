@@ -56,7 +56,8 @@ def contours_min_area_rect(contours: List[np.ndarray]) -> List[np.ndarray]:
 
 def contorus_area_similarity(contour1: np.ndarray, contour2: np.ndarray, threshold: float) -> bool:
     'Returns True if the contours are similar, '
-    return (1 - max(cv.contourArea(contour1), cv.contourArea(contour2))/min(cv.contourArea(contour1), cv.contourArea(contour2))) < threshold
+    area_ratio = min(cv.contourArea(contour1), cv.contourArea(contour2))/max(cv.contourArea(contour1), cv.contourArea(contour2))
+    return (1 - area_ratio) < threshold
 
 def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], image_size : Tuple[int,int]) -> List[np.ndarray]:
     '''Returns the cropped parts of the image that are inside the bounding boxes of the contours'''
