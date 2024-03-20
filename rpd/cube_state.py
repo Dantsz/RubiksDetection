@@ -9,3 +9,11 @@ class CubeState:
     The squares are represented as integers, where 0 is the top-left square and 8 is the bottom-right square.
     """
     state: np.ndarray
+
+    def to_solver_string(self) -> str:
+        """Returns the state of the cube as a string that can be used as input for the Kociemba solver.
+
+        The order of the center colors is as follows:
+        W , G , R , B , O , Y
+        """
+        return ""

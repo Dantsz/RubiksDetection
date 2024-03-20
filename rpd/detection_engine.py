@@ -16,6 +16,7 @@ class DetectionEngine:
     def __init__(self):
         logging.info("initializing DetectionEngine")
         self.last_face = None
+        self.orientation_correction = True
         pass
 
     def process_frame(self, frame: np.ndarray):
@@ -34,7 +35,7 @@ class DetectionEngine:
         # contours = features.contours_min_area_rect(contours)
         self.last_frame = frame
         self.last_contours = contours
-        face = metafeatures.detect_face(img, contours)
+        face = metafeatures.detect_face(img, contours, self.orientation_correction)
         if face is not None:
             self.last_face = face
 

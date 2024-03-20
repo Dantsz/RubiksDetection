@@ -89,7 +89,7 @@ class PreProcessingData:
             return None
         return (self.centers_of_mass[index], self.areas[index], self.orientation[index], self.normals[index])
 
-def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]]) -> Face:
+def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]], orientation_correction: bool) -> Face:
     """Assemble the face data from the preprocessed data."""
     squares: List[FaceSquare] = []
     for idx, id in enumerate(face_ids):
@@ -100,7 +100,11 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
-    rows = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
+    rows: list[list[FaceSquare]] = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
+    # add orientation correction, that means rotate the face so that the top row in the image is the top row of the face
+    if orientation_correction:
+        rows = correct_face_orientation(rows)
+
     return Face(rows)
 
 def check_face_integrity(face: Face, center_index) -> bool:
@@ -134,7 +138,7 @@ def check_face_integrity(face: Face, center_index) -> bool:
     # TODO: Add other checks for cube face
     return True
 
-def detect_face(frame, contours: List[np.ndarray]) -> Face | None:
+def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool = True) -> Face | None:
     """Find the face of the cube in the contours list."""
 
     assert len(frame.shape) == 3, "The image must be in BGR format, "
@@ -165,10 +169,28 @@ def detect_face(frame, contours: List[np.ndarray]) -> Face | None:
                 relative_positions.append(features.contour_basis_change(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
                 centers.append(contours_data.centers_of_mass[j])
         if len(face) == 9:
-            rows = assemble_face_data(frame, contours, contours_data, ids, relative_positions)
+            rows = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)
             if not check_face_integrity(rows, i):
                 continue
             # Could also skip
             return rows
         pass
     return None
+
+def correct_face_orientation(rows: list[list[Face]]) -> list[list[Face]]:
+    arr = np.array(rows)
+    best_rows = None
+    best = 0
+    for i in range(4):
+        test_rows = np.rot90(arr, i)
+        if best_rows is None:
+            best_rows = test_rows
+            best = sum([square.center[0] for square in test_rows[0]])
+        else:
+            # sum the y coordinates of the centers of the squares in the top row
+            sum_top = sum([square.center[0] for square in test_rows[0]])
+            # check if the sum is greater than the best sum
+            if sum_top < best:
+                best = sum_top
+                best_rows = test_rows
+    return best_rows.tolist()
