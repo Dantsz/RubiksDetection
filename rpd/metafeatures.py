@@ -178,11 +178,10 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
     return None
 
 def correct_face_orientation(rows: list[list[Face]]) -> list[list[Face]]:
-    arr = np.array(rows)
     best_rows = None
     best = 0
     for i in range(4):
-        test_rows = np.rot90(arr, i)
+        test_rows = np.rot90(rows, i)
         if best_rows is None:
             best_rows = test_rows
             best = sum([square.center[0] for square in test_rows[0]])
