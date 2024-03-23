@@ -11,7 +11,7 @@ from . import features
 from . import viewport_properties
 from . import orientation
 from . import metafeatures
-from . import color
+from . import cube_state
 class DetectionEngine:
     def __init__(self):
         logging.info("initializing DetectionEngine")
@@ -38,6 +38,7 @@ class DetectionEngine:
         face = metafeatures.detect_face(img, contours, self.orientation_correction)
         if face is not None:
             self.last_face = face
+
 
     def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''

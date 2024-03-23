@@ -1,5 +1,7 @@
 from enum import Enum
 
+from RubiksDetection.rpd import cube_state
+
 from . import metafeatures
 
 import logging
@@ -134,9 +136,16 @@ class LabelingEngine:
                         self.center_labels.append(self.colors[labels[index][0]])
 
 
-    def stateString(self) -> str:
-        if self.is_complete():
+    def state(self) -> cube_state.CubeState:
+        """Returns the state of the cube as a CubeState object."""
+        if not self.is_complete():
             raise ValueError("The cube is not complete")
+        return cube_state.CubeState(np.array(self.face_labels))
+   
+    def stateString(self) -> str:
+        if not self.is_complete():
+            raise ValueError("The cube is not complete")
+        return cube_state.CubeState(np.array(self.face_labels)).to_solver_string()
 
     def debug_image(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""

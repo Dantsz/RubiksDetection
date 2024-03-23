@@ -10,10 +10,19 @@ class CubeState:
     """
     state: np.ndarray
 
+    def __init__(self, state: np.ndarray):
+        assert state.shape == (6, 3, 3), "The state must be a 6x3x3"
+        self.state = state
+
     def to_solver_string(self) -> str:
         """Returns the state of the cube as a string that can be used as input for the Kociemba solver.
 
         The order of the center colors is as follows:
         W , G , R , B , O , Y
         """
-        return ""
+        string = ""
+        for face in self.state:
+            for row in face:
+                for square in row:
+                    string += SquareColor(square).name[0]
+        return string
