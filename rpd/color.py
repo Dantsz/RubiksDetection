@@ -40,3 +40,20 @@ def color_median_lab(img: np.ndarray) -> Tuple[float, float, float]:
     median_channel1 = np.median(lab[:,:,1])
     median_channel2 = np.median(lab[:,:,2])
     return median_channel0, median_channel1, median_channel2
+
+def color_to_spatial_symbol(color: SquareColor) -> str:
+    '''Converts a color to a spatial symbol.'''
+    if color == SquareColor.WHITE:
+        return 'U'
+    elif color == SquareColor.YELLOW:
+        return 'D'
+    elif color == SquareColor.BLUE:
+        return 'B'
+    elif color == SquareColor.GREEN:
+        return 'F'
+    elif color == SquareColor.RED:
+        return 'R'
+    elif color == SquareColor.ORANGE:
+        return 'L'
+    else:
+        return 'X'

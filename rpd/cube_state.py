@@ -1,6 +1,6 @@
 
 import numpy as np
-from .color import SquareColor
+from .color import SquareColor, color_to_spatial_symbol
 
 class CubeState:
     """Represents the state of a Rubik's cube.
@@ -22,7 +22,7 @@ class CubeState:
         """
         string = ""
         for face in self.state:
-            for row in face:
-                for square in row:
-                    string += SquareColor(square).name[0]
+            for col in range(0, 3):
+                for row in range(0, 3):
+                    string += color_to_spatial_symbol(SquareColor(face[row][col]))
         return string
