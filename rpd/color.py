@@ -23,8 +23,8 @@ reference_colors = np.array([
     [110, 185],
     [127, 100],
     [80, 155],
-    [160, 146],
-    [200, 178],
+    [190, 165],
+    [200, 180],
 ])
 
 def color_avg_lab(img: np.ndarray) -> Tuple[float, float, float]:
