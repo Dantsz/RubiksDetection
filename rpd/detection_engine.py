@@ -40,7 +40,7 @@ class DetectionEngine:
             self.last_face = face
 
 
-    def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True) -> np.ndarray:
+    def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
         def draw(img, center, imgpts):
             p1 = (int(imgpts[0][0]), int(imgpts[0][1]))
@@ -81,7 +81,11 @@ class DetectionEngine:
                         img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
                     # cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     color_met = square.avg_lab
-                    # cv.putText(img_2, f'{(int(color_met[1]), int(color_met[2]))}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
+                    if draw_avg_color:
+                        text_size = cv.getTextSize(f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', cv.FONT_HERSHEY_SIMPLEX, 0.35, 1)[0]
+                        text_x =  text_size[0] // 2
+                        text_y =  text_size[1] // 2
+                        img_2 = cv.putText(img_2, f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', (square.center[0] - text_x, square.center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv.LINE_AA)
                     # cv.putText(img_2, f'{cv.contourArea(square.contour)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
                     color = (float(color[0]), float(color[1]), float(color[2]))
