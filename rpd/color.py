@@ -58,8 +58,9 @@ def color_to_spatial_symbol(color: SquareColor) -> str:
     else:
         return 'X'
 
-def spatial_symbol_to_color(symbol: str) -> SquareColor:
+def spatial_symbol_to_color(move_str: str) -> SquareColor:
     '''Converts a spatial symbol to a color.'''
+    symbol = move_str[0]
     if symbol == 'U':
         return SquareColor.WHITE
     elif symbol == 'D':
