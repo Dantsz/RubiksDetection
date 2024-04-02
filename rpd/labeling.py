@@ -32,8 +32,6 @@ def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: li
     The second return value is a list of the centers of the clusters.
     """
     squares = np.float32(squares)
-    # center_squares_avg_lab = np.float32(centers)
-    # Apply k-means to the to k-means to the faces to identify the colors, using the center square of each face as seed point
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 0.2)
     _, labels, centers = cv.kmeans(squares, 6, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
@@ -141,7 +139,7 @@ class LabelingEngine:
         if not self.is_complete():
             raise ValueError("The cube is not complete")
         return cube_state.CubeState(np.array(self.face_labels))
-   
+
     def stateString(self) -> str:
         if not self.is_complete():
             raise ValueError("The cube is not complete")
