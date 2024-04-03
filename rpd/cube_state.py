@@ -28,6 +28,12 @@ class CubeState:
                     string += color_to_spatial_symbol(SquareColor(face[row][col]))
         return string
 
+    def is_solved(self) -> bool:
+        """Returns True if the cube is solved."""
+        # for face in self.state:
+        #     if
+        pass
+
     def rotate_clockwise(self, face: SquareColor) -> Self:
         """Rotates the face of the cube clockwise."""
         raise NotImplementedError("This method is not implemented yet.")

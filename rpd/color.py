@@ -9,22 +9,22 @@ import numpy as np
 class SquareColor(IntEnum):
     """Enum to represent the color of a square in a face of the cube."""
     WHITE = 0
-    YELLOW = 1
-    BLUE = 2
-    GREEN = 3
-    RED = 4
-    ORANGE = 5
+    RED = 1
+    GREEN = 2
+    YELLOW = 3
+    ORANGE = 4
+    BLUE = 5
     Unknown = 6
 
 # LAB values for the standard rubik's cube colors
 # Scaled 0-255 because opencv
 reference_colors = np.array([
-    [127, 127],
-    [110, 185],
-    [127, 100],
-    [80, 155],
-    [190, 165],
-    [200, 180],
+    [127, 127], # white
+    [190, 165], # red
+    [80, 155], # green
+    [110, 185], # yellow
+    [200, 180], # orange
+    [127, 100], # blue
 ])
 
 def color_avg_lab(img: np.ndarray) -> Tuple[float, float, float]:
