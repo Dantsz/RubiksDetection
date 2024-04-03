@@ -1,0 +1,8 @@
+numpy
+opencv-python==4.5.2
+opencv-contrib-python==4.5.2
+matplotlib
+pydantic
+kociemba
+pydot
+python-statemachine
