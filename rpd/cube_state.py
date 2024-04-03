@@ -1,4 +1,5 @@
 
+from typing import Self
 import numpy as np
 from .color import SquareColor, color_to_spatial_symbol
 
@@ -26,3 +27,15 @@ class CubeState:
                 for row in range(0, 3):
                     string += color_to_spatial_symbol(SquareColor(face[row][col]))
         return string
+
+    def rotate_clockwise(self, face: SquareColor) -> Self:
+        """Rotates the face of the cube clockwise."""
+        raise NotImplementedError("This method is not implemented yet.")
+        return self
+    def rotate_counter_clockwise(self, face: SquareColor) -> Self:
+        """Rotates the face of the cube counterclockwise."""
+        raise NotImplementedError("This method is not implemented yet.")
+        return self
+    def rotate_twice(self, face: SquareColor) -> Self:
+        """Rotates the face of the cube twice."""
+        return self.rotate_clockwise(face).rotate_clockwise(face)

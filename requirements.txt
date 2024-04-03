@@ -6,3 +6,4 @@ pydantic
 kociemba
 pydot
 python-statemachine
+pytest
