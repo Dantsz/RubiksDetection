@@ -1,6 +1,6 @@
 numpy
-opencv-python==4.8.1
-opencv-contrib-python==4.8.1
+opencv-python>=4.8.1
+opencv-contrib-python>=4.8.1
 matplotlib
 pydantic
 kociemba
