@@ -34,14 +34,34 @@ class CubeState:
         #     if
         pass
 
-    def rotate_clockwise(self, face: SquareColor) -> Self:
+    def get_face_line(self, face: int, row: int | None, col: int | None) -> np.ndarray:
+        """Returns a line of the face of the cube.
+        """
+        if row is not None:
+            return self.state[face][row]
+        elif col is not None:
+            return self.state[face][:, col]
+        else:
+            raise ValueError("Either row or col must be provided.")
+
+    def __set_face_line(self, face: int, row: int | None, col: int | None, line: np.ndarray) -> Self:
+        """Sets a line of the face of the cube."""
+        if row is not None:
+            self.state[face][row] = line
+        elif col is not None:
+            self.state[face][:, col] = line
+        else:
+            raise ValueError("Either row or col must be provided.")
+        return self
+
+    def rotate_clockwise_once(self, face: SquareColor) -> Self:
         """Rotates the face of the cube clockwise."""
         raise NotImplementedError("This method is not implemented yet.")
         return self
-    def rotate_counter_clockwise(self, face: SquareColor) -> Self:
+    def rotate_counter_clockwise_once(self, face: SquareColor) -> Self:
         """Rotates the face of the cube counterclockwise."""
         raise NotImplementedError("This method is not implemented yet.")
         return self
     def rotate_twice(self, face: SquareColor) -> Self:
         """Rotates the face of the cube twice."""
-        return self.rotate_clockwise(face).rotate_clockwise(face)
+        return self.rotate_clockwise_once(face).rotate_clockwise_once(face)
