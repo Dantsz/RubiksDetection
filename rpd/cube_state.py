@@ -13,7 +13,7 @@ class CubeState:
 
     def __init__(self, state: np.ndarray):
         assert state.shape == (6, 3, 3), "The state must be a 6x3x3"
-        self.state = state
+        self.state = state.copy()
 
     def to_solver_string(self) -> str:
         """Returns the state of the cube as a string that can be used as input for the Kociemba solver.
@@ -56,12 +56,84 @@ class CubeState:
 
     def rotate_clockwise_once(self, face: SquareColor) -> Self:
         """Rotates the face of the cube clockwise."""
-        raise NotImplementedError("This method is not implemented yet.")
+        match face:
+            case SquareColor.WHITE:
+                # Rotate the white face
+                np.rot90(self.state[0], 3)
+                # Rotate the adjacent faces
+                row_f_1 = self.get_face_line(1, 0, None).copy()
+                row_f_2 = self.get_face_line(2, 0, None).copy()
+                row_f_4 = self.get_face_line(4, 0, None).copy()
+                row_f_5 = self.get_face_line(5, 0, None).copy()
+                self.__set_face_line(1, 0, None, row_f_5)
+                self.__set_face_line(2, 0, None, row_f_1)
+                self.__set_face_line(4, 0, None, row_f_2)
+                self.__set_face_line(5, 0, None, row_f_4)
+            case SquareColor.RED:
+                # Rotate the red face
+                np.rot90(self.state[1], 3)
+                # Rotate the adjacent faces
+                col_f_0 = self.get_face_line(0, None, 2).copy()
+                col_f_2 = self.get_face_line(2, None, 2).copy()
+                col_f_3 = self.get_face_line(3, None, 2).copy()
+                col_f_5 = self.get_face_line(5, None, 0).copy()
+                self.__set_face_line(0, None, 2, col_f_2)
+                self.__set_face_line(2, None, 2, col_f_3)
+                self.__set_face_line(3, None, 2, col_f_5)
+                self.__set_face_line(5, None, 2, col_f_0)
+            case SquareColor.GREEN:
+                # Rotate the green face
+                np.rot90(self.state[2], 3)
+                # Rotate the adjacent faces
+                row_f_0 = self.get_face_line(0, 2, None).copy()
+                col_f_1 = self.get_face_line(1, None, 0).copy()
+                row_f_3 = self.get_face_line(3, 0, None).copy()
+                col_f_4 = self.get_face_line(4, None, 0).copy()
+                self.__set_face_line(0, 2, None, col_f_4)
+                self.__set_face_line(1, None, 0, row_f_0)
+                self.__set_face_line(3, 0, None, col_f_1)
+                self.__set_face_line(4, None, 2, row_f_3)
+            case SquareColor.YELLOW:
+                # Rotate the yellow face
+                np.rot90(self.state[3], 3)
+                # Rotate the adjacent faces
+                row_f_1 = self.get_face_line(1, 2, None).copy()
+                row_f_2 = self.get_face_line(2, 2, None).copy()
+                row_f_4 = self.get_face_line(4, 2, None).copy()
+                row_f_5 = self.get_face_line(5, 2, None).copy()
+                self.__set_face_line(1, 2, None, row_f_2)
+                self.__set_face_line(2, 2, None, row_f_4)
+                self.__set_face_line(4, 2, None, row_f_5)
+                self.__set_face_line(5, 2, None, row_f_1)
+            case SquareColor.ORANGE:
+                # Rotate the orange face
+                np.rot90(self.state[4], 3)
+                # Rotate the adjacent faces
+                col_f_0 = self.get_face_line(0, None, 0).copy()
+                col_f_2 = self.get_face_line(2, None, 0).copy()
+                col_f_3 = self.get_face_line(3, None, 0).copy()
+                col_f_5 = self.get_face_line(5, None, 2).copy()
+                self.__set_face_line(0, None, 0, col_f_5)
+                self.__set_face_line(2, None, 0, col_f_0)
+                self.__set_face_line(3, None, 0, col_f_2)
+                self.__set_face_line(5, None, 2, col_f_3)
+
+            case SquareColor.BLUE:
+                # Rotate the blue face
+                np.rot90(self.state[5], 3)
+                # Rotate the adjacent faces
+                row_f_0 = self.get_face_line(0, 0, None).copy()
+                col_f_1 = self.get_face_line(1, None, 2).copy()
+                row_f_3 = self.get_face_line(3, 2, None).copy()
+                col_f_4 = self.get_face_line(4, None, 0).copy()
+                self.__set_face_line(0, 0, None, col_f_1)
+                self.__set_face_line(1, None, 2, row_f_3)
+                self.__set_face_line(3, 2, None, col_f_4)
+                self.__set_face_line(4, None, 0, row_f_0)
         return self
     def rotate_counter_clockwise_once(self, face: SquareColor) -> Self:
         """Rotates the face of the cube counterclockwise."""
-        raise NotImplementedError("This method is not implemented yet.")
-        return self
+        return self.rotate_clockwise_once(face).rotate_clockwise_once(face).rotate_clockwise_once(face)
     def rotate_twice(self, face: SquareColor) -> Self:
         """Rotates the face of the cube twice."""
         return self.rotate_clockwise_once(face).rotate_clockwise_once(face)
