@@ -30,9 +30,10 @@ class CubeState:
 
     def is_solved(self) -> bool:
         """Returns True if the cube is solved."""
-        # for face in self.state:
-        #     if
-        pass
+        for face_id in range(0, 6):
+            if not np.all(self.state[face_id] == face_id):
+                return False
+        return True
 
     def get_face_line(self, face: int, row: int | None, col: int | None) -> np.ndarray:
         """Returns a line of the face of the cube.
