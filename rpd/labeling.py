@@ -123,6 +123,10 @@ class LabelingEngine:
 
         self.last_centers = centers
         self.colors = fit_colors_to_labels(labels, self.last_centers)
+        self.color_centers = list(range(6))
+        for i in range(6):
+            self.color_centers[int(self.colors[i])] = self.last_centers[i]
+
         for x, face in enumerate(self.face_data):
             self.face_labels.append([])
             for i, square_row in enumerate(face.faces):

@@ -16,6 +16,7 @@ class DetectionEngine:
     def __init__(self):
         logging.info("initializing DetectionEngine")
         self.last_face = None
+        self._face_in_last_frame = False
         self.orientation_correction = True
         pass
 
@@ -38,7 +39,17 @@ class DetectionEngine:
         face = metafeatures.detect_face(img, contours, self.orientation_correction)
         if face is not None:
             self.last_face = face
+            self._face_in_last_frame = True
+        else:
+            self._face_in_last_frame = False
 
+
+    def last_frame_detected_face(self) -> bool:
+        '''Returns true if the last frame has detected a face or false otherwise
+
+        self.last_face contains the last valid face detected and provides no info whether the last detected frame contained a face or not
+        '''
+        return self._face_in_last_frame
 
     def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False, draw_coordinates: bool = False) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
