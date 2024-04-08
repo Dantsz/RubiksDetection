@@ -1,8 +1,17 @@
 import numpy as np
+from enum import Enum
 import logging
 
 from RubiksDetection.rpd.color import SquareColor
 from . import metafeatures
+
+class SolutionDisplayRelativeLocation(Enum):
+    """Which side of the target face needs to be shifted"""
+    LEFT = 0
+    RIGHT = 1
+    TOP = 2
+    BOTTOM = 3
+
 class SolutionDisplayEngine:
 
     def __init__(self):
@@ -53,14 +62,22 @@ class SolutionDisplayEngine:
         if move[1] == "2":
             return color, 2
 
-    def __get_move_display_target_face(self, move: str) -> SquareColor:
+    def __get_move_display_target_face(self, move: str) -> tuple[SquareColor, SolutionDisplayRelativeLocation]:
         """Return the face the move should be displayed on."""
         color, _ = self.__move_str_to_face_and_direction(move)
         match color:
-            case SquareColor.WHITE | SquareColor.RED | SquareColor.ORANGE | SquareColor.YELLOW:
-                return SquareColor.GREEN
-            case SquareColor.GREEN | SquareColor.BLUE:
-                return SquareColor.WHITE
+            case SquareColor.WHITE:
+                return SquareColor.GREEN, SolutionDisplayRelativeLocation.TOP
+            case SquareColor.RED:
+                return SquareColor.GREEN, SolutionDisplayRelativeLocation.RIGHT
+            case SquareColor.ORANGE:
+                return SquareColor.GREEN, SolutionDisplayRelativeLocation.LEFT
+            case SquareColor.YELLOW:
+                return SquareColor.GREEN, SolutionDisplayRelativeLocation.BOTTOM
+            case SquareColor.GREEN:
+                return SquareColor.WHITE, SolutionDisplayRelativeLocation.BOTTOM
+            case SquareColor.BLUE:
+                return SquareColor.WHITE, SolutionDisplayRelativeLocation.TOP
 
     def __classify_face_squares(self, face: metafeatures.Face) -> np.ndarray:
         classified_face = np.zeros((3, 3), dtype=SquareColor)
