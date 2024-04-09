@@ -103,8 +103,8 @@ class LabelingEngine:
         all_squares_avg_lab: list[tuple[float, float, float]] = []
         center_squares_avg_lab: list[tuple[float, float, float]] = []
         for face in self.face_data:
-            for i, square_row in enumerate(face):
-                for j, square in enumerate(square_row):
+            for i, square_col in enumerate(face):
+                for j, square in enumerate(square_col):
                     all_squares_avg_lab.append(square.avg_lab)
                     if i == 1 and j == 1:
                         center_squares_avg_lab.append(square.avg_lab)
@@ -129,9 +129,9 @@ class LabelingEngine:
 
         for x, face in enumerate(self.face_data):
             self.face_labels.append([])
-            for i, square_row in enumerate(face.faces):
+            for i, square_col in enumerate(face.faces):
                 self.face_labels[x].append([])
-                for j, square in enumerate(square_row):
+                for j, square in enumerate(square_col):
                     index = 9 * x + len(face.faces) * i + j
                     self.face_labels[x][i].append(self.colors[labels[index][0]])
                     if i == 1 and j == 1:
@@ -159,8 +159,8 @@ class LabelingEngine:
         avg_points = []
         colors = []
         for idx, face in enumerate(self.face_data):
-            for i, row in enumerate(face):
-                for j, square in enumerate(row):
+            for i, col in enumerate(face):
+                for j, square in enumerate(col):
                     color_met = square.avg_lab
                     color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
                     color = (float(color[0]), float(color[1]), float(color[2]))
@@ -183,8 +183,8 @@ class LabelingEngine:
         plt.scatter(x, y, c='red')
 
         for fi, face in enumerate(self.face_data):
-            for i, square_row in enumerate(face):
-                for j, square in enumerate(square_row):
+            for i, square_col in enumerate(face):
+                for j, square in enumerate(square_col):
                     if i == 1 and j == 1:
                         plt.annotate(self.face_labels[fi][i][j].name, (square.avg_lab[1], square.avg_lab[2]), textcoords="offset points", xytext=(0,10), ha='center')
 

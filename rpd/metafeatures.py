@@ -50,6 +50,14 @@ class Face:
         else:
             return self.faces[index]
 
+    def get_face_contour(self) -> np.ndarray:
+        """Return the contour of the face as a list of points."""
+        #TODO: optimize this to not use all the contours
+        big_contour = np.concatenate([square.contour for row in self.faces for square in row])
+        rect = cv.minAreaRect(big_contour)
+        box = cv.boxPoints(rect)
+        return np.int0(box)
+
 class PreProcessingData:
     """Structure-of-arrays containing data derived from a contour."""
 
@@ -101,6 +109,7 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
     rows: list[list[FaceSquare]] = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
+
     # add orientation correction, that means rotate the face so that the top row in the image is the top row of the face
     if orientation_correction:
         rows = correct_face_orientation(rows)

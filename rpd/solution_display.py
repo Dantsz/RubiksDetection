@@ -1,8 +1,12 @@
 import numpy as np
 from enum import Enum
 import logging
+import copy
+
+import cv2 as cv
 
 from RubiksDetection.rpd.color import SquareColor
+from RubiksDetection.rpd.cube_state import CubeState
 from . import metafeatures
 
 class SolutionDisplayRelativeLocation(Enum):
@@ -20,10 +24,13 @@ class SolutionDisplayEngine:
     def reset(self):
         self.centers = None
         self.solving_moves = None
+        self.remaining_moves = None
+        self.cube_state = None
 
-    def consume_solution(self, detected_centers, solving_moves: list[str]):
+    def consume_solution(self, detected_centers, state: CubeState, solving_moves: list[str]):
         self.centers = detected_centers
         self.solving_moves = solving_moves
+        self.cube_state = state
         self.remaining_moves = solving_moves.copy()
 
     def ready(self):
@@ -93,6 +100,18 @@ class SolutionDisplayEngine:
                 classified_face[j, i] = SquareColor(color)
         return classified_face
 
+    def __get_expected_state_after_move(self, move: str) -> CubeState:
+        expected_state = copy.deepcopy(self.cube_state)
+        moved_face, direction = self.__move_str_to_face_and_direction(move)
+        match direction:
+            case 1:
+                expected_state.rotate_clockwise_once(moved_face)
+            case -1:
+                expected_state.rotate_counter_clockwise_once(moved_face)
+            case 2:
+                expected_state.rotate_twice(moved_face)
+        return expected_state
+
 
 
     def display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> np.ndarray:
@@ -100,7 +119,15 @@ class SolutionDisplayEngine:
         if len(self.remaining_moves) == 0:
             return frame
         move = self.remaining_moves[0]
-        logging.info(f"Move is : {move}, should display on color {self.__get_move_display_target_face(move)}")
+        expected_state = self.__get_expected_state_after_move(move)
+        target_face, target_location = self.__get_move_display_target_face(move)
+        expected_face = expected_state.get_face(target_face)
+        print(f"Expected face {expected_face}, after move {move}")
+
+        # logging.info(f"Move is : {move}, should display on color {self.__get_move_display_target_face(move)}")
+        # face_contour = face.get_face_contour()
+        # frame = cv.drawContours(frame, [face_contour], -1, (255, 0, 255), 2)
+
         return frame
         #Flow:
             #Decide which face should be displayed based on the move

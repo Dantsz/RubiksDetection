@@ -28,6 +28,10 @@ class CubeState:
                     string += color_to_spatial_symbol(SquareColor(face[row][col]))
         return string
 
+    def get_face(self, face: SquareColor) -> np.ndarray:
+        """Returns the face of the cube."""
+        return self.state[int(face)]
+
     def is_solved(self) -> bool:
         """Returns True if the cube is solved."""
         for face_id in range(0, 6):
@@ -35,7 +39,7 @@ class CubeState:
                 return False
         return True
 
-    def get_face_line(self, face: int, row: int | None, col: int | None) -> np.ndarray:
+    def get_face_line(self, face: int, col: int | None, row: int | None) -> np.ndarray:
         """Returns a line of the face of the cube.
         """
         if row is not None:
@@ -45,7 +49,7 @@ class CubeState:
         else:
             raise ValueError("Either row or col must be provided.")
 
-    def __set_face_line(self, face: int, row: int | None, col: int | None, line: np.ndarray) -> Self:
+    def __set_face_line(self, face: int, col: int | None, row: int | None, line: np.ndarray) -> Self:
         """Sets a line of the face of the cube."""
         if row is not None:
             self.state[face][row] = line

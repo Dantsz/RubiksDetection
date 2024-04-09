@@ -86,8 +86,8 @@ class DetectionEngine:
         if face is None:
             pass
         else:
-            for i, row in enumerate(face):
-                for j, square in enumerate(row):
+            for i, col in enumerate(face):
+                for j, square in enumerate(col):
                     if draw_face:
                         img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
                     # cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
