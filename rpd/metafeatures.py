@@ -186,21 +186,21 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
         pass
     return None
 
-def correct_face_orientation(rows: list[list[Face]]) -> list[list[Face]]:
+def correct_face_orientation(columns: list[list[Face]]) -> list[list[Face]]:
     """Rotate the face so that the top row in the image is the top row of the face."""
     #TODO: This only takes into account the x-axis, it should also take into account the y-axis by saving the two best rotations and then comparing them on the y-axis
     best_rows = None
     best = 0
     for i in range(4):
-        test_rows = np.rot90(rows, i)
+        test_columns = np.rot90(columns, i)
         if best_rows is None:
-            best_rows = test_rows
-            best = sum([square.center[0] for square in test_rows[0]])
+            best_rows = test_columns
+            best = sum([square.center[0] for square in test_columns[0]])
         else:
             # sum the x coordinates of the centers of the squares in the top row
-            sum_top = sum([square.center[0] for square in test_rows[0]])
+            sum_top = sum([square.center[0] for square in test_columns[0]])
             # check if the sum is greater than the best sum
             if sum_top < best:
                 best = sum_top
-                best_rows = test_rows
+                best_rows = test_columns
     return best_rows.tolist()
