@@ -108,13 +108,13 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
         squares.append(square)
     squares = sorted(squares, key=lambda k: k.relative_position[0])
-    rows: list[list[FaceSquare]] = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
+    columns: list[list[FaceSquare]] = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
 
     # add orientation correction, that means rotate the face so that the top row in the image is the top row of the face
     if orientation_correction:
-        rows = correct_face_orientation(rows)
+        columns = correct_face_orientation(columns)
 
-    return Face(rows)
+    return Face(columns)
 
 def check_face_integrity(face: Face, center_index) -> bool:
     # TODO: MAKE RETURN FALSE INSTEAD OF ASSERT
@@ -178,23 +178,23 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
                 relative_positions.append(features.contour_basis_change(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
                 centers.append(contours_data.centers_of_mass[j])
         if len(face) == 9:
-            rows = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)
-            if not check_face_integrity(rows, i):
+            columns = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)
+            if not check_face_integrity(columns, i):
                 continue
             # Could also skip
-            return rows
+            return columns
         pass
     return None
 
 def correct_face_orientation(columns: list[list[Face]]) -> list[list[Face]]:
     """Rotate the face so that the top row in the image is the top row of the face."""
     #TODO: This only takes into account the x-axis, it should also take into account the y-axis by saving the two best rotations and then comparing them on the y-axis
-    best_rows = None
+    best_columns = None
     best = 0
     for i in range(4):
         test_columns = np.rot90(columns, i)
-        if best_rows is None:
-            best_rows = test_columns
+        if best_columns is None:
+            best_columns = test_columns
             best = sum([square.center[0] for square in test_columns[0]])
         else:
             # sum the x coordinates of the centers of the squares in the top row
@@ -202,5 +202,5 @@ def correct_face_orientation(columns: list[list[Face]]) -> list[list[Face]]:
             # check if the sum is greater than the best sum
             if sum_top < best:
                 best = sum_top
-                best_rows = test_columns
-    return best_rows.tolist()
+                best_columns = test_columns
+    return best_columns.tolist()
