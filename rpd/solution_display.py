@@ -9,13 +9,16 @@ from RubiksDetection.rpd.color import SquareColor
 from RubiksDetection.rpd.cube_state import CubeState
 from . import metafeatures
 
+class DisplaySolutionResult(Enum):
+    GOT_FACE = 0 # Means face is correct
+    FAILED_FACE = 1 # Means face is not correct and direction to the face should be drawn
+    DONE = 2 # No more moves to display
 class SolutionDisplayRelativeLocation(Enum):
     """Which side of the target face needs to be shifted"""
     LEFT = 0
     RIGHT = 1
     TOP = 2
     BOTTOM = 3
-
 class SolutionDisplayEngine:
 
     def __init__(self):
@@ -36,7 +39,7 @@ class SolutionDisplayEngine:
     def ready(self):
         return self.centers is not None and self.solving_moves is not None
 
-    def __move_code_to_face(self, move: str) -> metafeatures.Face:
+    def __move_code_to_face(self, move: str) -> SquareColor:
         """Perform a move on a face."""
         assert len(move) == 1, f"Invalid move {move}"
         match move:
@@ -55,7 +58,7 @@ class SolutionDisplayEngine:
             case _:
                 raise ValueError(f"Invalid move {move}")
 
-    def __move_str_to_face_and_direction(self, move: str) -> tuple[metafeatures.Face, int]:
+    def __move_str_to_face_and_direction(self, move: str) -> tuple[SquareColor, int]:
         """Return the face and direction of the move.
 
         The direction is 1 for clockwise and -1 for counterclockwise and 2 for 180 degrees.
@@ -87,7 +90,7 @@ class SolutionDisplayEngine:
                 return SquareColor.WHITE, SolutionDisplayRelativeLocation.TOP
 
     def __classify_face_squares(self, face: metafeatures.Face) -> np.ndarray:
-        classified_face = np.zeros((3, 3), dtype=SquareColor)
+        classified_face = np.zeros((3, 3), dtype=int)
         for i, row in enumerate(face):
             for j, square in enumerate(row):
                 color = 6
@@ -97,7 +100,7 @@ class SolutionDisplayEngine:
                     if cur_best is None or dist < cur_best:
                         cur_best = dist
                         color = k
-                classified_face[j, i] = SquareColor(color)
+                classified_face[i, j] = color
         return classified_face
 
     def __get_expected_state_after_move(self, move: str) -> CubeState:
@@ -112,23 +115,62 @@ class SolutionDisplayEngine:
                 expected_state.rotate_twice(moved_face)
         return expected_state
 
+    def __draw_color_line(self, frame: np.ndarray, color: tuple[int, int, int], start: tuple[int, int], end: tuple[int, int], direction: int) -> np.ndarray:
+        if direction == 1:
+            cv.arrowedLine(frame, start, end, color, 5)
+        elif direction == -1:
+            cv.arrowedLine(frame, end, start, color, 5)
+        elif direction == 2:
+            cv.line(frame, start, end, color, 5)
+        return frame
 
+    def draw_move(self, frame: np.ndarray, move: str, face: metafeatures.Face, location: SolutionDisplayRelativeLocation) -> np.ndarray:
+        """Draws the move on the face."""
+        _, direction = self.__move_str_to_face_and_direction(move)
+        start, end = None, None
+        match location:
+            case SolutionDisplayRelativeLocation.LEFT:
+                start = face.faces[0][0].center
+                end = face.faces[0][2].center
+            case SolutionDisplayRelativeLocation.RIGHT:
+                start = face.faces[2][2].center
+                end = face.faces[2][0].center
+            case SolutionDisplayRelativeLocation.TOP:
+                start = face.faces[2][0].center
+                end = face.faces[0][0].center
+            case SolutionDisplayRelativeLocation.BOTTOM:
+                start = face.faces[0][2].center
+                end = face.faces[2][2].center
+        frame = self.__draw_color_line(frame, (0, 255, 0), start, end, direction)
+        return frame
 
-    def display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> np.ndarray:
+    def display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
         # logging.info(f"Current face {self.__classify_face_squares(face)}")
         if len(self.remaining_moves) == 0:
-            return frame
+            return frame, DisplaySolutionResult.DONE
         move = self.remaining_moves[0]
         expected_state = self.__get_expected_state_after_move(move)
         target_face, target_location = self.__get_move_display_target_face(move)
         expected_face = expected_state.get_face(target_face)
+        current_face = self.__classify_face_squares(face)
+
         print(f"Expected face {expected_face}, after move {move}")
+
+        if expected_face[1][1] == current_face[1][1]:
+            if np.array_equal(expected_face, current_face):
+                self.remaining_moves.pop(0)
+                self.cube_state = expected_state
+                print(f"Move {move} is correct")
+            else:
+                frame = self.draw_move(frame, move, face, target_location)
+        else:
+            print(f"Face {current_face[1][1]} is incorrect, should be {expected_face[1][1]}")
+            return frame, DisplaySolutionResult.FAILED_FACE
 
         # logging.info(f"Move is : {move}, should display on color {self.__get_move_display_target_face(move)}")
         # face_contour = face.get_face_contour()
         # frame = cv.drawContours(frame, [face_contour], -1, (255, 0, 255), 2)
-
-        return frame
+        return frame, DisplaySolutionResult.GOT_FACE
         #Flow:
             #Decide which face should be displayed based on the move
             #Detect if the face is the one to perform the move on, else DRAW MOVE TO GET TO THAT FACE

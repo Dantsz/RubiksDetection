@@ -279,3 +279,32 @@ def test_cube_rotate_face_B():
     state = cube_state.CubeState(SOLVED_STATE_ARRAY).rotate_clockwise_once(cube_state.SquareColor.BLUE)
     expected = cube_state.CubeState(B_STATE_ARRAY)
     assert np.array_equal(state.state, expected.state), "Expected: \n{}\nGot: \n{}".format(expected.state, state.state)
+
+def test_cube_test_target_face_rotation():
+    state = cube_state.CubeState(W_STATE_ARRAY).rotate_clockwise_once(cube_state.SquareColor.RED)
+    expected_r_face = np.array([
+                                [1, 1, 1],
+                                [1, 1, 1],
+                                [5, 5, 5],])
+    assert np.array_equal(state.get_face(cube_state.SquareColor.RED), expected_r_face), "Expected: \n{}\nGot: \n{}".format(expected_r_face, state.get_face(cube_state.SquareColor.RED))
+
+def test_cube_test_modulo():
+    state = cube_state.CubeState(W_STATE_ARRAY).rotate_clockwise_once(cube_state.SquareColor.YELLOW).rotate_clockwise_once(cube_state.SquareColor.YELLOW).rotate_clockwise_once(cube_state.SquareColor.YELLOW).rotate_clockwise_once(cube_state.SquareColor.YELLOW)
+    expected_state = cube_state.CubeState(W_STATE_ARRAY)
+    assert np.array_equal(state.state, expected_state.state, "Expected: \n{}\nGot: \n{}".format(expected_state.state, state.state))
+
+def test_cube_mirror():
+    state = cube_state.CubeState(W_STATE_ARRAY).rotate_clockwise_once(cube_state.SquareColor.YELLOW)
+    expected_face = np.array([
+        [5, 1, 2],
+        [5, 1, 2],
+        [5, 1, 2],
+    ])
+    assert np.array_equal(state.get_face(cube_state.SquareColor.RED), expected_face), "Expected: \n{}\nGot: \n{}".format(expected_face, state.get_face(cube_state.SquareColor.WHITE))
+    expected_after_G = np.array([
+        [2, 4, 5],
+        [2, 4, 5],
+        [2, 1, 5],
+    ])
+    state.rotate_clockwise_once(cube_state.SquareColor.GREEN).rotate_clockwise_once(cube_state.SquareColor.GREEN)
+    assert np.array_equal(state.get_face(cube_state.SquareColor.ORANGE), expected_after_G), "Expected: \n{}\nGot: \n{}".format(expected_after_G, state.get_face(cube_state.SquareColor.ORANGE))
