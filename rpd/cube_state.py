@@ -88,7 +88,7 @@ class CubeState:
                 self.__set_face_line(0, None, 2, col_f_2)
                 self.__set_face_line(2, None, 2, col_f_3)
                 self.__set_face_line(3, None, 2, col_f_5)
-                self.__set_face_line(5, None, 2, col_f_0)
+                self.__set_face_line(5, None, 0, col_f_0)
             case SquareColor.GREEN:
                 # Rotate the adjacent faces
                 row_f_0 = self.get_face_line(0, 2, None, True).copy()
