@@ -5,7 +5,8 @@ import math
 import json
 
 from dataclasses import asdict, dataclass
-from typing import List, Tuple, Union
+from typing import Callable, List, Tuple, Union
+from numbers import Number
 
 from . import viewport_properties as vp
 from . import orientation
@@ -97,7 +98,7 @@ class PreProcessingData:
             return None
         return (self.centers_of_mass[index], self.areas[index], self.orientation[index], self.normals[index])
 
-def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]], orientation_correction: bool) -> Face:
+def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]], orientation_correction: bool) -> Face | None:
     """Assemble the face data from the preprocessed data."""
     squares: List[FaceSquare] = []
     for idx, id in enumerate(face_ids):
@@ -107,12 +108,13 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
         avg_lab = color.color_avg_lab(square_img[0])
         square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
         squares.append(square)
-    squares = sorted(squares, key=lambda k: k.relative_position[0])
-    columns: list[list[FaceSquare]] = [sorted(squares[x:x+3],key= lambda k: k.relative_position[1]) for x in range(0, len(squares), 3)]
 
+    columns: list[list[FaceSquare]] = __reorder_face(squares, lambda k: k.relative_position)
     # add orientation correction, that means rotate the face so that the top row in the image is the top row of the face
     if orientation_correction:
-        columns = correct_face_orientation(columns)
+        columns = correct_face_orientation(columns, squares)
+        if columns is None:
+            return None
 
     return Face(columns)
 
@@ -179,6 +181,8 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
                 centers.append(contours_data.centers_of_mass[j])
         if len(face) == 9:
             columns = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)
+            if columns is None:
+                continue
             if not check_face_integrity(columns, i):
                 continue
             # Could also skip
@@ -186,21 +190,25 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
         pass
     return None
 
-def correct_face_orientation(columns: list[list[Face]]) -> list[list[Face]]:
+def correct_face_orientation(arrangement: list[list[Face]], squares: list[Face]) -> list[list[Face]] | None:
     """Rotate the face so that the top row in the image is the top row of the face."""
     #TODO: This only takes into account the x-axis, it should also take into account the y-axis by saving the two best rotations and then comparing them on the y-axis
-    best_columns = None
-    best = 0
+    # Reconstruct the face as it appears in the image
+    image_orientation = __reorder_face(squares, lambda k: k.center)
+
+    # Rotate until they have the same first column
     for i in range(4):
-        test_columns = np.rot90(columns, i)
-        if best_columns is None:
-            best_columns = test_columns
-            best = sum([square.center[0] for square in test_columns[0]])
-        else:
-            # sum the x coordinates of the centers of the squares in the top row
-            sum_top = sum([square.center[0] for square in test_columns[0]])
-            # check if the sum is greater than the best sum
-            if sum_top < best:
-                best = sum_top
-                best_columns = test_columns
-    return best_columns.tolist()
+        test_columns = np.rot90(arrangement, i)
+        if test_columns[0][0].id != image_orientation[0][0].id:
+            continue
+        if test_columns[0][1].id != image_orientation[0][1].id:
+            continue
+        if test_columns[0][2].id != image_orientation[0][2].id:
+            continue
+        return test_columns
+    return None
+
+def __reorder_face(face: list[FaceSquare], accesor: Callable[[FaceSquare], tuple[Number, Number]]) -> list[list[FaceSquare]]:
+    squares = sorted(face, key=lambda k: accesor(k)[0])
+    columns: list[list[FaceSquare]] = [sorted(squares[x:x+3],key= lambda k: accesor(k)[1]) for x in range(0, len(squares), 3)]
+    return columns
