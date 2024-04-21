@@ -72,21 +72,43 @@ class SolutionDisplayEngine:
         if move[1] == "2":
             return color, 2
 
-    def __get_move_display_target_face(self, move: str) -> tuple[SquareColor, SolutionDisplayRelativeLocation]:
+    def __valid_target_face(self, target_face: SquareColor, current_state: CubeState, expected_state: CubeState) -> bool:
+        """If after the move the target face is the same it cannot be a target face"""
+        return not np.array_equal(current_state.get_face(target_face), expected_state.get_face(target_face))
+
+    def __get_move_display_target_face(self, move: str, current_state: CubeState, expected_state: CubeState) -> tuple[SquareColor, SolutionDisplayRelativeLocation]:
         """Return the face the move should be displayed on."""
         color, _ = self.__move_str_to_face_and_direction(move)
         match color:
             case SquareColor.WHITE:
+                if not self.__valid_target_face(SquareColor.GREEN, current_state, expected_state):
+                    # logging.warning(f"Move {move} should not be displayed on another face")
+                    return SquareColor.ORANGE, SolutionDisplayRelativeLocation.TOP
                 return SquareColor.GREEN, SolutionDisplayRelativeLocation.TOP
             case SquareColor.RED:
+                if not self.__valid_target_face(SquareColor.GREEN, current_state, expected_state):
+                    logging.debug(f"Move {move} should not be displayed on another face")
+                    return SquareColor.WHITE, SolutionDisplayRelativeLocation.RIGHT
                 return SquareColor.GREEN, SolutionDisplayRelativeLocation.RIGHT
             case SquareColor.ORANGE:
+                if not self.__valid_target_face(SquareColor.GREEN, current_state, expected_state):
+                    logging.debug(f"Move {move} should not be displayed on another face")
+                    return SquareColor.WHITE, SolutionDisplayRelativeLocation.LEFT
                 return SquareColor.GREEN, SolutionDisplayRelativeLocation.LEFT
             case SquareColor.YELLOW:
+                if not self.__valid_target_face(SquareColor.GREEN, current_state, expected_state):
+                    logging.debug(f"Move {move} should not be displayed on another face")
+                    return SquareColor.ORANGE, SolutionDisplayRelativeLocation.BOTTOM
                 return SquareColor.GREEN, SolutionDisplayRelativeLocation.BOTTOM
             case SquareColor.GREEN:
+                if not self.__valid_target_face(SquareColor.WHITE, current_state, expected_state):
+                    logging.debug(f"Move {move} should not be displayed on another face")
+                    return SquareColor.ORANGE, SolutionDisplayRelativeLocation.RIGHT
                 return SquareColor.WHITE, SolutionDisplayRelativeLocation.BOTTOM
             case SquareColor.BLUE:
+                if not self.__valid_target_face(SquareColor.WHITE, current_state, expected_state):
+                    logging.debug(f"Move {move} should not be displayed on another face")
+                    return SquareColor.ORANGE, SolutionDisplayRelativeLocation.LEFT
                 return SquareColor.WHITE, SolutionDisplayRelativeLocation.TOP
 
     def __classify_face_squares(self, face: metafeatures.Face) -> np.ndarray:
@@ -168,21 +190,22 @@ class SolutionDisplayEngine:
             return frame, DisplaySolutionResult.DONE
         move = self.remaining_moves[0]
         expected_state: CubeState = self.__get_expected_state_after_move(move)
-        target_face, target_location = self.__get_move_display_target_face(move)
+        target_face, target_location = self.__get_move_display_target_face(move, self.cube_state, expected_state)
         expected_face = expected_state.get_face(target_face)
-        current_face = self.__classify_face_squares(face)
+        detected_face = self.__classify_face_squares(face)
+        current_face = self.cube_state.get_face(target_face)
 
         print(f"Expected face {expected_face}, after move {move}")
 
-        if expected_face[1][1] == current_face[1][1]:
-            if np.array_equal(expected_face, current_face):
+        if expected_face[1][1] == detected_face[1][1]:
+            if np.array_equal(expected_face, detected_face):
                 self.remaining_moves.pop(0)
                 self.cube_state = expected_state
                 print(f"Move {move} is correct")
             else:
                 frame = self.draw_move(frame, move, face, target_location)
         else:
-            print(f"Face {current_face[1][1]} is incorrect, should be {expected_face[1][1]}")
+            print(f"Face {detected_face[1][1]} is incorrect, should be {expected_face[1][1]}")
             frame = self.draw_face_change_move(frame, target_face, face)
             return frame, DisplaySolutionResult.FAILED_FACE
 
