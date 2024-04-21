@@ -29,8 +29,18 @@ class SolutionDisplayEngine:
         self.solving_moves = None
         self.remaining_moves = None
         self.cube_state = None
+        # helper info
+        self.first_tick = True# Will be true before and during the first tick of the current solution
+        self.first_solved_tick = True # If the tick of display state is before the second time display_state has been called on a state
+        # hooks
+        def empty():
+            pass
+        self.on_initialize = empty
+        self.on_solution_start = empty
+        self.on_solution_done = empty
 
     def consume_solution(self, detected_centers, state: CubeState, solving_moves: list[str]):
+        self.on_initialize()
         self.centers = detected_centers
         self.solving_moves = solving_moves
         self.cube_state = state
@@ -188,8 +198,15 @@ class SolutionDisplayEngine:
 
     def display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
         # logging.info(f"Current face {self.__classify_face_squares(face)}")
+        if self.first_tick:
+            self.on_solution_start()
+            self.first_tick = False
+
         if len(self.remaining_moves) == 0:
             frame = self.__draw_text_above_face(frame, face, "Solved")
+            if self.first_solved_tick:
+             self.on_solution_done()
+             self.first_solved_tick = False
             return frame, DisplaySolutionResult.DONE
         move = self.remaining_moves[0]
         expected_state: CubeState = self.__get_expected_state_after_move(move)
