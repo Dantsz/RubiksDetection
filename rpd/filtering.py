@@ -82,9 +82,11 @@ def canny_amax_adaptive_filter(img, gaussian_blur_kerner: int = vp.FILTER_GAUSSI
     kernel = np.ones((morphological_kernel, morphological_kernel), np.uint8)
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     thresh = cv.erode(thresh, np.ones((vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE, vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE), np.uint8), iterations=1)
-    thresh = cv.GaussianBlur(thresh, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
-    edges = cv.Canny(thresh, vp.FILTER_CANNY_THRESHOLD_1, vp.FILTER_CANNY_THRESHOLD_2)
-    return edges
+    return thresh
+    # This shouldn't be necessary
+    # thresh = cv.GaussianBlur(thresh, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
+    # edges = cv.Canny(thresh, vp.FILTER_CANNY_THRESHOLD_1, vp.FILTER_CANNY_THRESHOLD_2)
+    # return edges
 
 def sobel_amax_filter(img) :
     gray = np.amax(img, axis=2)
