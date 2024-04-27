@@ -9,10 +9,12 @@ def estimate_focal_length(image_width: float, fov: float) -> List[np.ndarray]:
     """Returns an estimate of the camera focal length given the image width and the field of view."""
     return (image_width/2) * (1/math.tan(math.radians(fov/2)))
 
-def build_camera_matrix(fov: float, image_width: float, image_height: float) -> np.ndarray:
+def build_camera_matrix(fov: tuple[float, float], image_width: float, image_height: float) -> np.ndarray:
     """Returns the camera matrix"""
-    focal_length = estimate_focal_length(image_width, fov)
-    return np.array([[focal_length, 0, image_width/2], [0, focal_length, image_height/2], [0, 0, 1]])
+    fov_x, fov_y = fov
+    focal_length_x = estimate_focal_length(image_width, fov_x)
+    focal_length_y = estimate_focal_length(image_width, fov_y)
+    return np.array([[focal_length_x, 0, image_width/2], [0, focal_length_y, image_height/2], [0, 0, 1]])
 
 def estimate_rectangle_contour_pose(contour: np.ndarray, camera_matrix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Returns the rotation and translation vectors of the contour pose, using the camera matrix and the image size."""
