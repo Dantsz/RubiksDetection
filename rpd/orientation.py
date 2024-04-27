@@ -13,7 +13,7 @@ def build_camera_matrix(fov: tuple[float, float], image_width: float, image_heig
     """Returns the camera matrix"""
     (fov_x, fov_y) = fov
     focal_length_x = estimate_focal_length(image_width, fov_x)
-    focal_length_y = estimate_focal_length(image_width, fov_y)
+    focal_length_y = estimate_focal_length(image_height, fov_y)
     return np.array([[focal_length_x, 0, image_width/2], [0, focal_length_y, image_height/2], [0, 0, 1]])
 
 def estimate_rectangle_contour_pose(contour: np.ndarray, camera_matrix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -25,7 +25,7 @@ def estimate_rectangle_contour_pose(contour: np.ndarray, camera_matrix: np.ndarr
         contour = np.int0(cv.boxPoints(cv.minAreaRect(contour)))
         rect_points_2d = contour.astype(np.float32)
     rect_points_3d = np.array([(-1.0, 1.0, 0.0), (1.0, 1.0, 0.0), (1.0, -1.0, 0.0), (-1.0, -1.0, 0.0)])
-    (success, rotation_vector, translation_vector) = cv.solvePnP(rect_points_3d, rect_points_2d, camera_matrix, None, flags=cv.SOLVEPNP_SQPNP)
+    (success, rotation_vector, translation_vector) = cv.solvePnP(rect_points_3d, rect_points_2d, camera_matrix, None, flags=cv.SOLVEPNP_IPPE_SQUARE)
     assert success, "solvePnP failed to find the pose of the contour"
     return (rotation_vector, translation_vector)
 
