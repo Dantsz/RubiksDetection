@@ -5,13 +5,13 @@ import cv2 as cv
 import math
 from typing import List, Tuple
 
-def estimate_focal_length(image_width: float, fov: float) -> List[np.ndarray]:
-    """Returns an estimate of the camera focal length given the image width and the field of view."""
-    return (image_width/2) * (1/math.tan(math.radians(fov/2)))
+def estimate_focal_length(image_dim: float, fov: float) -> List[np.ndarray]:
+    """Returns an estimate of the camera focal length given the an image dimension and the field of view."""
+    return (image_dim/2) * (1/math.tan(math.radians(fov/2)))
 
 def build_camera_matrix(fov: tuple[float, float], image_width: float, image_height: float) -> np.ndarray:
     """Returns the camera matrix"""
-    fov_x, fov_y = fov
+    (fov_x, fov_y) = fov
     focal_length_x = estimate_focal_length(image_width, fov_x)
     focal_length_y = estimate_focal_length(image_width, fov_y)
     return np.array([[focal_length_x, 0, image_width/2], [0, focal_length_y, image_height/2], [0, 0, 1]])

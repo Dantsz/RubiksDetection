@@ -73,7 +73,7 @@ class PreProcessingData:
         self.areas = []
         self.orientation = []
         self.normals = []
-        camera_matrix = orientation.build_camera_matrix(vp.ORIENTATION_ESTIMATED_FOV_W, vp.WIDTH, vp.HEIGHT)
+        camera_matrix = orientation.build_camera_matrix((vp.ORIENTATION_ESTIMATED_FOV_W, vp.ORIENTATION_ESTIMATED_FOV_H), vp.WIDTH, vp.HEIGHT)
         for contour in contours:
             M = cv.moments(contour)
             if M["m00"] == 0:
@@ -155,7 +155,7 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
     assert len(frame.shape) == 3, "The image must be in BGR format, "
     if len(contours) < 9: # We need at least 9 contours to form a cube for now
         return None
-    camera_matrix = orientation.build_camera_matrix(vp.ORIENTATION_ESTIMATED_FOV_W, vp.WIDTH, vp.HEIGHT)
+    camera_matrix = orientation.build_camera_matrix((vp.ORIENTATION_ESTIMATED_FOV_W, vp.ORIENTATION_ESTIMATED_FOV_H), vp.WIDTH, vp.HEIGHT)
     contours_data = PreProcessingData(contours)
     # Check each contour and find 8 neighbors
     for i in range(len(contours)):
