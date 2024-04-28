@@ -13,6 +13,8 @@ class DisplaySolutionResult(Enum):
     GOT_FACE = 0 # Means face is correct
     FAILED_FACE = 1 # Means face is not correct and direction to the face should be drawn
     DONE = 2 # No more moves to display
+    NOT_READY = 3
+    FAILED_DETECTION = 4
 class SolutionDisplayRelativeLocation(Enum):
     """Which side of the target face needs to be shifted"""
     LEFT = 0
@@ -32,6 +34,7 @@ class SolutionDisplayEngine:
         # helper info
         self.first_tick = True# Will be true before and during the first tick of the current solution
         self.first_solved_tick = True # If the tick of display state is before the second time display_state has been called on a state
+        self.display_errors = False
         # hooks
         def empty():
             pass
@@ -176,10 +179,9 @@ class SolutionDisplayEngine:
         frame = self.__draw_color_line(frame, (0, 255, 0), start, end, direction)
         return frame
 
-    def __draw_text_above_face(self, frame: np.ndarray, face: metafeatures.Face, text: str) -> np.ndarray:
+    def __draw_text_above_face(self, frame: np.ndarray, face: metafeatures.Face, text: str, font_color: tuple[int, int, int]) -> np.ndarray:
         font = cv.FONT_HERSHEY_SIMPLEX
         font_scale = 1
-        font_color = (0, 255, 0)
         line_type = 2
         middle_up_center = face.faces[1][0].center
         middle_center = face.faces[1][1].center
@@ -194,16 +196,29 @@ class SolutionDisplayEngine:
     def __draw_face_change_move(self, frame: np.ndarray, target_face: SquareColor, face : metafeatures.Face) -> np.ndarray:
         """Draws the text to indicate the face change."""
         text = f"Change face to: {target_face.name}"
-        return self.__draw_text_above_face(frame, face, text)
+        return self.__draw_text_above_face(frame, face, text, font_color = (0, 255, 0))
 
-    def display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
-        # logging.info(f"Current face {self.__classify_face_squares(face)}")
+    def display(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
+        if self.ready():
+            return self.__display_solution(frame, face)
+        elif self.display_errors:
+            return self.__display_error(frame, face)
+        return frame, DisplaySolutionResult.NOT_READY
+
+    def __display_error(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
+        if self.first_tick:
+            self.on_solution_start()
+            self.first_tick = False
+        frame = self.__draw_text_above_face(frame, face, "Failed to detect cube, press RESET", font_color = (0, 0, 255))
+        return frame, DisplaySolutionResult.FAILED_DETECTION
+
+    def __display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
         if self.first_tick:
             self.on_solution_start()
             self.first_tick = False
 
         if len(self.remaining_moves) == 0:
-            frame = self.__draw_text_above_face(frame, face, "Solved")
+            frame = self.__draw_text_above_face(frame, face, "Solved", font_color = (0, 255, 0))
             if self.first_solved_tick:
              self.on_solution_done()
              self.first_solved_tick = False
@@ -213,7 +228,6 @@ class SolutionDisplayEngine:
         target_face, target_location = self.__get_move_display_target_face(move, self.cube_state, expected_state)
         expected_face = expected_state.get_face(target_face)
         detected_face = self.__classify_face_squares(face)
-        current_face = self.cube_state.get_face(target_face)
 
         # print(f"Expected face {expected_face}, after move {move}")
 

@@ -120,6 +120,7 @@ class LabelingEngine:
             logging.info("The labels are consistent")
         else:
             logging.warning("The labels are not consistent")
+            raise ValueError("The labels are not consistent")
 
         self.last_centers = centers
         self.colors = fit_colors_to_labels(labels, self.last_centers)
