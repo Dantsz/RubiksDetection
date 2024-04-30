@@ -69,7 +69,7 @@ def canny_amax_filter(img) :
     edges = cv.Canny(gray, 100, 200)
     return edges
 
-def canny_amax_adaptive_filter(img, gaussian_blur_kerner: int = vp.FILTER_GAUSSIAN_DEFAULT_KSIZE, morphological_kernel: int = vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE) :
+def amax_adaptive_filter(img, gaussian_blur_kerner: int = vp.FILTER_GAUSSIAN_DEFAULT_KSIZE, morphological_kernel: int = vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE) :
     gray =  np.amax(img, axis=2)
     gray = cv.convertScaleAbs(gray)
     gray = cv.GaussianBlur(gray, (gaussian_blur_kerner, gaussian_blur_kerner), 0)

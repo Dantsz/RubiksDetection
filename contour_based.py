@@ -17,7 +17,7 @@ diplay_modes: list = ["original", "filtered", "contours"]
 def process_frame(frame):
 
     img = frame
-    img_1 = filtering.canny_amax_adaptive_filter(img)
+    img_1 = filtering.amax_adaptive_filter(img)
     #Find contours with opencv
     contours, hierarchy = cv.findContours(img_1, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     contours = features.contours_filter_small_area(contours, viewport_properties.FEATURES_FILTER_MIN_AREA)
