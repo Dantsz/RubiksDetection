@@ -51,7 +51,7 @@ class DetectionEngine:
         '''
         return self._face_in_last_frame
 
-    def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False, draw_coordinates: bool = False) -> np.ndarray:
+    def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False, draw_coordinates: bool = False, draw_miniature: bool = False) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
         def draw(img, center, imgpts):
             p1 = (int(imgpts[0][0]), int(imgpts[0][1]))
@@ -81,7 +81,6 @@ class DetectionEngine:
             imgpts = imgpts.squeeze(axis=1)
             if draw_orientation:
                 img_2 = draw(img_2, center, imgpts)
-            # cv.putText(img_2, f'{cv.contourArea(contour)}', (center[0], center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
         face = self.last_face
         if face is None:
             pass
@@ -90,7 +89,6 @@ class DetectionEngine:
                 for j, square in enumerate(col):
                     if draw_face:
                         img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
-                    # cv.putText(img_2, f'{(i,j)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     color_met = square.avg_lab
                     if draw_avg_color:
                         text_size = cv.getTextSize(f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', cv.FONT_HERSHEY_SIMPLEX, 0.35, 1)[0]
@@ -104,8 +102,9 @@ class DetectionEngine:
                         img_2 = cv.putText(img_2, f'{(coords_1[0], coords_1[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] - 10), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 2, cv.LINE_AA)
                         img_2 = cv.putText(img_2, f'{(coords_2[0], coords_2[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] + 10), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 2, cv.LINE_AA)
                     # cv.putText(img_2, f'{cv.contourArea(square.contour)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
-                    color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
-                    color = (float(color[0]), float(color[1]), float(color[2]))
-                    rectangle_pos = (i * 25, j * 25)
-                    img_2 = cv.rectangle(img_2, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
+                    if draw_miniature:
+                        color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
+                        color = (float(color[0]), float(color[1]), float(color[2]))
+                        rectangle_pos = (i * 25, j * 25)
+                        img_2 = cv.rectangle(img_2, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
         return img_2
