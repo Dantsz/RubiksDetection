@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 logging.getLogger("PIL").setLevel(logging.INFO)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
-from pydantic import BaseModel
 from .color import SquareColor, reference_colors
 
 def check_label_consistency(labels: np.ndarray) -> bool:
