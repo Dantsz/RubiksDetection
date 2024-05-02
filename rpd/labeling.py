@@ -149,7 +149,7 @@ class LabelingEngine:
             raise ValueError("The cube is not complete")
         return cube_state.CubeState(np.array(self.face_labels)).to_solver_string()
 
-    def debug_image(self, dimensions: tuple[int, int] = (800, 100)):
+    def debug_image_2d(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""
         logging.info("Creating debug image")
         plt.clf()
@@ -170,7 +170,7 @@ class LabelingEngine:
                     avg_points.append(face[i][j].avg_lab)
 
                     color_rgb = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2RGB)[0][0]
-                    color_rgb = (float(color[0]), float(color[1]), float(color[2]))
+                    color_rgb = (float(color_rgb[0]), float(color_rgb[1]), float(color_rgb[2]))
                     colors.append(np.array(color_rgb, dtype=np.float16))
 
         x = [x[1] for x in avg_points]
@@ -189,6 +189,60 @@ class LabelingEngine:
                         plt.annotate(self.face_labels[fi][i][j].name, (square.avg_lab[1], square.avg_lab[2]), textcoords="offset points", xytext=(0,10), ha='center')
 
 
+        fig = plt.gcf()
+        fig.canvas.draw()
+        plot_img = np.array(fig.canvas.renderer.buffer_rgba())
+        plot_img = cv.cvtColor(plot_img, cv.COLOR_RGBA2BGR)
+        plot_img = cv.resize(plot_img, (800,600))
+
+        img =  cv.vconcat([img, plot_img])
+
+        return img
+
+    def debug_image_3d(self, dimensions: tuple[int, int] = (800, 100)):
+        """Returns an image with the debug information of the state of the cube."""
+        logging.info("Creating debug image")
+        # Createa a black image
+        img = np.zeros((dimensions[1], dimensions[0], 3), np.uint8)
+        # Draw the faces
+        avg_points = []
+        colors = []
+        for idx, face in enumerate(self.face_data):
+            for i, col in enumerate(face):
+                for j, square in enumerate(col):
+                    color_met = square.avg_lab
+                    color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]
+                    color = (float(color[0]), float(color[1]), float(color[2]))
+                    rectangle_pos = (idx * 100 + i * 25, j * 25)
+                    img = cv.rectangle(img, rectangle_pos, (rectangle_pos[0] + 25, rectangle_pos[1] + 25), color, -1)
+                    img = cv.putText(img, f"{int(self.face_labels[idx][i][j])}", (rectangle_pos[0] + 5, rectangle_pos[1] + 15), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
+                    avg_points.append(face[i][j].avg_lab)
+
+                    color_rgb = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2RGB)[0][0]
+                    color_rgb = (float(color_rgb[0]), float(color_rgb[1]), float(color_rgb[2]))
+                    colors.append(np.array(color_rgb, dtype=np.float16))
+
+        ax = plt.figure().add_subplot(projection='3d')
+        l = [x[0] for x in avg_points]
+        a = [x[1] for x in avg_points]
+        b = [x[2] for x in avg_points]
+        normalized_colors = np.array(colors) / 255
+        ax.scatter(l, a, b,c=normalized_colors)
+
+        l = [x[0] for x in self.last_centers]
+        a = [x[1] for x in self.last_centers]
+        b = [x[2] for x in self.last_centers]
+        ax.scatter(l, a, b, c='red')
+
+        for fi, face in enumerate(self.face_data):
+            for i, square_col in enumerate(face):
+                for j, square in enumerate(square_col):
+                    if i == 1 and j == 1:
+                        ax.text(square.avg_lab[0], square.avg_lab[1], square.avg_lab[2], self.face_labels[fi][i][j].name)
+
+        ax.set_xlabel('L')
+        ax.set_ylabel('A')
+        ax.set_zlabel('B')
         fig = plt.gcf()
         fig.canvas.draw()
         plot_img = np.array(fig.canvas.renderer.buffer_rgba())
