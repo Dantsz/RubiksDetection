@@ -51,6 +51,12 @@ class DetectionEngine:
         '''
         return self._face_in_last_frame
 
+    def pop_face(self) -> metafeatures.Face | None:
+        '''Returns the last detected face and resets the internal state'''
+        face = self.last_face
+        self.last_face = None
+        return face
+
     def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False, draw_coordinates: bool = False, draw_miniature: bool = False) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
         def draw(img, center, imgpts):
