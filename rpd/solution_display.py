@@ -5,7 +5,7 @@ import copy
 
 import cv2 as cv
 
-from RubiksDetection.rpd.color import SquareColor
+from RubiksDetection.rpd.color import SquareColor, move_code_to_face
 from RubiksDetection.rpd.cube_state import CubeState
 from . import metafeatures
 
@@ -52,32 +52,13 @@ class SolutionDisplayEngine:
     def ready(self):
         return self.centers is not None and self.solving_moves is not None
 
-    def __move_code_to_face(self, move: str) -> SquareColor:
-        """Perform a move on a face."""
-        assert len(move) == 1, f"Invalid move {move}"
-        match move:
-            case 'W':
-                return SquareColor.WHITE
-            case 'R':
-                return SquareColor.RED
-            case 'G':
-                return SquareColor.GREEN
-            case 'Y':
-                return SquareColor.YELLOW
-            case 'O':
-                return SquareColor.ORANGE
-            case 'B':
-                return SquareColor.BLUE
-            case _:
-                raise ValueError(f"Invalid move {move}")
-
     def __move_str_to_face_and_direction(self, move: str) -> tuple[SquareColor, int]:
         """Return the face and direction of the move.
 
         The direction is 1 for clockwise and -1 for counterclockwise and 2 for 180 degrees.
         """
         assert len(move) <= 2, f"Invalid move {move}"
-        color = self.__move_code_to_face(move[0])
+        color = move_code_to_face(move[0])
         if len(move) == 1:
             return color, 1
         if move[1] == "'":
