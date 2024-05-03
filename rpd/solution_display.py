@@ -140,7 +140,7 @@ class SolutionDisplayEngine:
             cv.line(frame, start, end, color, 5)
         return frame
 
-    def draw_move(self, frame: np.ndarray, move: str, face: metafeatures.Face, location: SolutionDisplayRelativeLocation) -> np.ndarray:
+    def draw_move(self, frame: np.ndarray, move: str, face: metafeatures.Face, location: SolutionDisplayRelativeLocation, mirrored: bool) -> np.ndarray:
         """Draws the move on the face."""
         _, direction = self.__move_str_to_face_and_direction(move)
         start, end = None, None
@@ -157,10 +157,13 @@ class SolutionDisplayEngine:
             case SolutionDisplayRelativeLocation.BOTTOM:
                 start = face.faces[0][2].center
                 end = face.faces[2][2].center
+        if mirrored:
+            start = (frame.shape[1] - start[0], start[1])
+            end = (frame.shape[1] - end[0], end[1])
         frame = self.__draw_color_line(frame, (0, 255, 0), start, end, direction)
         return frame
 
-    def __draw_text_above_face(self, frame: np.ndarray, face: metafeatures.Face, text: str, font_color: tuple[int, int, int]) -> np.ndarray:
+    def __draw_text_above_face(self, frame: np.ndarray, face: metafeatures.Face, text: str, font_color: tuple[int, int, int], mirrored: bool= False) -> np.ndarray:
         font = cv.FONT_HERSHEY_SIMPLEX
         font_scale = 1
         line_type = 2
@@ -171,35 +174,39 @@ class SolutionDisplayEngine:
         text_y =  text_size[1] // 2
 
         display_vec = (middle_up_center[0] + middle_up_center[0] - middle_center[0], middle_up_center[1] + middle_up_center[1] - middle_center[1])
-        cv.putText(frame, text, (display_vec[0] - text_x, display_vec[1]), font, font_scale, font_color, line_type)
+        if mirrored:
+            display_vec = (frame.shape[1] - display_vec[0] - text_x, display_vec[1])
+        else:
+            display_vec = (display_vec[0] - text_x, display_vec[1])
+        cv.putText(frame, text, (display_vec[0], display_vec[1]), font, font_scale, font_color, line_type)
         return frame
 
-    def __draw_face_change_move(self, frame: np.ndarray, target_face: SquareColor, face : metafeatures.Face) -> np.ndarray:
+    def __draw_face_change_move(self, frame: np.ndarray, target_face: SquareColor, face : metafeatures.Face, mirrored: bool) -> np.ndarray:
         """Draws the text to indicate the face change."""
         text = f"Change face to: {target_face.name}"
-        return self.__draw_text_above_face(frame, face, text, font_color = (0, 255, 0))
+        return self.__draw_text_above_face(frame, face, text, font_color = (0, 255, 0), mirrored=mirrored)
 
-    def display(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
+    def display(self, frame: np.ndarray, face : metafeatures.Face, mirrored: bool) -> tuple[np.ndarray, DisplaySolutionResult]:
         if self.ready():
-            return self.__display_solution(frame, face)
+            return self.__display_solution(frame, face, mirrored)
         elif self.display_errors:
-            return self.__display_error(frame, face)
+            return self.__display_error(frame, face, mirrored)
         return frame, DisplaySolutionResult.NOT_READY
 
-    def __display_error(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
+    def __display_error(self, frame: np.ndarray, face : metafeatures.Face, mirrored: bool) -> tuple[np.ndarray, DisplaySolutionResult]:
         if self.first_tick:
             self.on_solution_start()
             self.first_tick = False
-        frame = self.__draw_text_above_face(frame, face, "Failed to detect cube, press RESET", font_color = (0, 0, 255))
+        frame = self.__draw_text_above_face(frame, face, "Failed to detect cube, press RESET", font_color = (0, 0, 255), mirrored=mirrored)
         return frame, DisplaySolutionResult.FAILED_DETECTION
 
-    def __display_solution(self, frame: np.ndarray, face : metafeatures.Face) -> tuple[np.ndarray, DisplaySolutionResult]:
+    def __display_solution(self, frame: np.ndarray, face : metafeatures.Face, mirrored: bool = False) -> tuple[np.ndarray, DisplaySolutionResult]:
         if self.first_tick:
             self.on_solution_start()
             self.first_tick = False
 
         if len(self.remaining_moves) == 0:
-            frame = self.__draw_text_above_face(frame, face, "Solved", font_color = (0, 255, 0))
+            frame = self.__draw_text_above_face(frame, face, "Solved", font_color = (0, 255, 0), mirrored=mirrored)
             if self.first_solved_tick:
              self.on_solution_done()
              self.first_solved_tick = False
@@ -218,10 +225,10 @@ class SolutionDisplayEngine:
                 self.cube_state = expected_state
                 print(f"Move {move} is correct")
             else:
-                frame = self.draw_move(frame, move, face, target_location)
+                frame = self.draw_move(frame, move, face, target_location, mirrored)
         else:
             print(f"Face {detected_face[1][1]} is incorrect, should be {expected_face[1][1]}")
-            frame = self.__draw_face_change_move(frame, target_face, face)
+            frame = self.__draw_face_change_move(frame, target_face, face, mirrored)
             return frame, DisplaySolutionResult.FAILED_FACE
 
         # logging.info(f"Move is : {move}, should display on color {self.__get_move_display_target_face(move)}")

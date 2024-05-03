@@ -57,7 +57,7 @@ class DetectionEngine:
         self.last_face = None
         return face
 
-    def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False, draw_coordinates: bool = False, draw_miniature: bool = False) -> np.ndarray:
+    def debug_frame(self, frame: np.ndarray, draw_orientation: bool = False, draw_contours: bool = True, draw_face = True, draw_avg_color: bool = False, draw_coordinates: bool = False, draw_miniature: bool = False, mirrored: bool = False) -> np.ndarray:
         '''Draws debug info on the frame, if it's none it will be draw on a black image'''
         def draw(img, center, imgpts):
             p1 = (int(imgpts[0][0]), int(imgpts[0][1]))
@@ -72,7 +72,11 @@ class DetectionEngine:
         img_2 = frame
 
         if draw_contours:
+            if mirrored:
+                img_2 = cv.flip(img_2, 1)
             img_2 = cv.drawContours(img_2, self.last_contours, -1, (0,255,0), 3)
+            if mirrored:
+                img_2 = cv.flip(img_2, 1)
         for contour in self.last_contours:
             M = cv.moments(contour)
             if M["m00"] == 0:
@@ -86,7 +90,11 @@ class DetectionEngine:
             imgpts, jac = cv.projectPoints(axis, rotation_vector, translation_vector, camera_matrix, None)
             imgpts = imgpts.squeeze(axis=1)
             if draw_orientation:
+                if mirrored:
+                 img_2 = cv.flip(img_2, 1)
                 img_2 = draw(img_2, center, imgpts)
+                if mirrored:
+                 img_2 = cv.flip(img_2, 1)
         face = self.last_face
         if face is None:
             pass
@@ -94,16 +102,28 @@ class DetectionEngine:
             for i, col in enumerate(face):
                 for j, square in enumerate(col):
                     if draw_face:
+                        if mirrored:
+                            img_2 = cv.flip(img_2, 1)
                         img_2 = cv.drawContours(img_2, [square.contour], -1, (0,0,255), 3)
+                        if mirrored:
+                            img_2 = cv.flip(img_2, 1)
                     color_met = square.avg_lab
                     if draw_avg_color:
                         text_size = cv.getTextSize(f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', cv.FONT_HERSHEY_SIMPLEX, 0.35, 1)[0]
                         text_x =  text_size[0] // 2
                         text_y =  text_size[1] // 2
-                        img_2 = cv.putText(img_2, f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', (square.center[0] - text_x, square.center[1]), cv.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv.LINE_AA)
+                        coords =  square.center
+                        if mirrored:
+                            coords = (viewport_properties.WIDTH - coords[0] - text_x, coords[1])
+                        else:
+                            coords = (coords[0] - text_x, coords[1])
+                        img_2 = cv.putText(img_2, f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', coords, cv.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv.LINE_AA)
                     if draw_coordinates:
                         coords_1 = square.center
                         coords_2 = square.relative_position
+                        if mirrored:
+                            coords_1 = (viewport_properties.WIDTH - coords_1[0], coords_1[1])
+                            coords_2 = (viewport_properties.WIDTH - coords_2[0], coords_2[1])
                         text_size = cv.getTextSize(f'{(coords_1[0], coords_1[1])}', cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
                         img_2 = cv.putText(img_2, f'{(coords_1[0], coords_1[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] - 10), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 2, cv.LINE_AA)
                         img_2 = cv.putText(img_2, f'{(coords_2[0], coords_2[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] + 10), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 2, cv.LINE_AA)
