@@ -65,14 +65,12 @@ class PreProcessingData:
     centers_of_mass: List[Tuple[int, int] | None]
     areas: List[float | None]
     orientation: List[Tuple[np.ndarray, np.ndarray, np.ndarray] | None]
-    normals: List[np.ndarray | None]
 
     def __init__(self, contours: List[np.ndarray]):
         """Build data from detected contours."""
         self.centers_of_mass = []
         self.areas = []
         self.orientation = []
-        self.normals = []
         camera_matrix = orientation.build_camera_matrix((vp.ORIENTATION_ESTIMATED_FOV_W, vp.ORIENTATION_ESTIMATED_FOV_H), vp.WIDTH, vp.HEIGHT)
         for contour in contours:
             M = cv.moments(contour)
@@ -80,30 +78,27 @@ class PreProcessingData:
                 self.centers_of_mass.append(None)
                 self.orientation.append(None)
                 self.areas.append(None)
-                self.normals.append(None)
                 continue
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             self.centers_of_mass.append(center)
 
             (rotation_vector, translation_vector) = orientation.estimate_rectangle_contour_pose(contour, camera_matrix)
-            normal_vector = orientation.compute_rectangle_normal_vector(rotation_vector)
-            self.orientation.append((rotation_vector, translation_vector, normal_vector))
+            self.orientation.append((rotation_vector, translation_vector))
 
             self.areas.append(cv.contourArea(contour))
-            self.normals.append(normal_vector)
         pass
 
     def __getitem__(self, index: int) -> Tuple[Tuple[int, int], float, Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray] | None:
-        if (self.centers_of_mass is None or self.areas is None or self.orientation is None or self.normals is None):
+        if (self.centers_of_mass is None or self.areas is None or self.orientation is None):
             return None
-        return (self.centers_of_mass[index], self.areas[index], self.orientation[index], self.normals[index])
+        return (self.centers_of_mass[index], self.areas[index], self.orientation[index])
 
 def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PreProcessingData, face_ids: List[int], relative_positions: List[Tuple[float, float]], orientation_correction: bool) -> Face | None:
     """Assemble the face data from the preprocessed data."""
     squares: List[FaceSquare] = []
     for idx, id in enumerate(face_ids):
         assert contours_data[id] is not None, f"Contour {id} is None"
-        center, area, orientation, normal = contours_data[id]
+        center, area, orientation = contours_data[id]
         square_img = features.contours_crop_and_reverse_perspective(frame, [contours[id]], (100,100))
         avg_lab = color.color_avg_lab(square_img[0])
         square = FaceSquare(id, contours[id], center, relative_positions[idx], avg_lab)
@@ -163,8 +158,8 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
             continue
         face = [contours[i]]
         ids = [i]
-        (rotation_vector, translation_vector, normal_vector) = contours_data.orientation[i]
-        relative_positions = [(features.contour_to_world_coordinates(contours_data.centers_of_mass[i], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))]
+        (rotation_vector, translation_vector) = contours_data.orientation[i]
+        relative_positions = [(features.contour_to_world_coordinates(contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))]
         centers = [contours_data.centers_of_mass[i]]
         #Find contour orientation
         for j in range(len(contours)):
@@ -177,7 +172,7 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
                 # Find position of the neighbor contour relative to the center contour
                 face.append(contours[j])
                 ids.append(j)
-                relative_positions.append(features.contour_to_world_coordinates(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
+                relative_positions.append(features.contour_to_world_coordinates(contours_data.centers_of_mass[j], camera_matrix, rotation_vector, translation_vector))
                 centers.append(contours_data.centers_of_mass[j])
         if len(face) == 9:
             columns = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)
