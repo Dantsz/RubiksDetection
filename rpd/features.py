@@ -71,9 +71,9 @@ def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], ima
         cropped_images.append(cv.warpPerspective(image, matrix, (image_width, image_height)))
     return cropped_images
 
-def contour_to_world_coordinates(contour_center: Tuple[int,int], camera_matrix: np.ndarray, rotation_vector: np.ndarray, translation_vector: np.ndarray) -> Tuple[float, float]:
+def contour_center_to_world_coordinates(contour_center: Tuple[int,int], camera_matrix: np.ndarray, rotation_vector: np.ndarray, translation_vector: np.ndarray) -> Tuple[float, float]:
     '''Returns the contour in the basis of the rotation and translation vectors'''
-    obj_points = np.float32([[contour_center[0], contour_center[1], 1] ]).reshape(-1,3)
+    obj_points = np.float32([[contour_center[0], contour_center[1], 0] ]).reshape(-1,3)
     rotation_matrix, _ = cv.Rodrigues(rotation_vector)
     inverse_rotation_matrix = rotation_matrix.transpose()
     # relative_point, _ = cv.projectPoints(obj_points, inverse_rotation_vector, -translation_vector, camera_matrix, None)
