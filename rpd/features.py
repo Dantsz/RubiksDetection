@@ -12,19 +12,14 @@ def contours_filter_large(contours: List[np.ndarray], threshold: float) -> List[
     'Returns the contours that are smaller than threshold'
     return [contour for contour in contours if cv.contourArea(contour) < threshold]
 
-def contours_filter_convex(contours: List[np.ndarray]) -> List[np.ndarray]:
-    'Returns the contours that are convex'
-    return [contour for contour in contours if cv.isContourConvex(contour)]
-
 def contours_filter_solidity(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that have solidity larger than threshold'
     return [contour for contour in contours if cv.contourArea(contour)/cv.contourArea(cv.convexHull(contour)) > threshold]
 
-def distance(point1, point2):
-    return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
-
 def contours_filter_isolated_contours(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that are within (perimeter/4) distance from the center of mass of a another contour'
+    def __distance(point1, point2):
+     return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
     filtered_contours = []
     for i in range(len(contours)):
         for j in range(i+1, len(contours)):
@@ -34,12 +29,11 @@ def contours_filter_isolated_contours(contours: List[np.ndarray], threshold: flo
             M2 = cv.moments(contour2)
             center1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
             center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
-            if distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/4 + cv.arcLength(contour2, True)/4):
+            if __distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/4 + cv.arcLength(contour2, True)/4):
                 if not any(np.array_equal(contour1, contour) for contour in filtered_contours):
                     filtered_contours.append(contour1)
                 if not any(np.array_equal(contour2, contour) for contour in filtered_contours):
                     filtered_contours.append(contour2)
-
     return filtered_contours
 
 def approx_polygon_from_contour(contours: List[np.ndarray] , epsilon: float = vp.FEATURES_POLY_APPROX_DEFAULT_EPSILON) -> np.ndarray:
