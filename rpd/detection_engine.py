@@ -120,13 +120,14 @@ class DetectionEngine:
                         img_2 = cv.putText(img_2, f'{(int(color_met[0]),int(color_met[1]), int(color_met[2]))}', coords, cv.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv.LINE_AA)
                     if draw_coordinates:
                         coords_1 = square.center
-                        coords_2 = square.relative_position
+                        coords_2 = np.around(square.relative_position, 3)
                         if mirrored:
                             coords_1 = (viewport_properties.WIDTH - coords_1[0], coords_1[1])
                             coords_2 = (viewport_properties.WIDTH - coords_2[0], coords_2[1])
                         text_size = cv.getTextSize(f'{(coords_1[0], coords_1[1])}', cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
                         img_2 = cv.putText(img_2, f'{(coords_1[0], coords_1[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] - 10), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 2, cv.LINE_AA)
-                        img_2 = cv.putText(img_2, f'{(coords_2[0], coords_2[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] + 10), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 2, cv.LINE_AA)
+                        v=10.3
+                        img_2 = cv.putText(img_2, f'{(coords_2[0], coords_2[1])}', (coords_1[0] - text_size[0]//2, coords_1[1] + 10), cv.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1, cv.LINE_AA)
                     # cv.putText(img_2, f'{cv.contourArea(square.contour)}', square.center, cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv.LINE_AA)
                     if draw_miniature:
                         color = cv.cvtColor(np.array([[color_met]], dtype=np.uint8),cv.COLOR_LAB2BGR)[0][0]

@@ -164,7 +164,7 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
         face = [contours[i]]
         ids = [i]
         (rotation_vector, translation_vector, normal_vector) = contours_data.orientation[i]
-        relative_positions = [(features.contour_basis_change(contours_data.centers_of_mass[i], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))]
+        relative_positions = [(features.contour_to_world_coordinates(contours_data.centers_of_mass[i], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))]
         centers = [contours_data.centers_of_mass[i]]
         #Find contour orientation
         for j in range(len(contours)):
@@ -177,7 +177,7 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
                 # Find position of the neighbor contour relative to the center contour
                 face.append(contours[j])
                 ids.append(j)
-                relative_positions.append(features.contour_basis_change(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
+                relative_positions.append(features.contour_to_world_coordinates(contours_data.centers_of_mass[j], contours_data.centers_of_mass[i], camera_matrix, rotation_vector, translation_vector))
                 centers.append(contours_data.centers_of_mass[j])
         if len(face) == 9:
             columns = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)

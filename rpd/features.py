@@ -12,14 +12,19 @@ def contours_filter_large(contours: List[np.ndarray], threshold: float) -> List[
     'Returns the contours that are smaller than threshold'
     return [contour for contour in contours if cv.contourArea(contour) < threshold]
 
+def contours_filter_convex(contours: List[np.ndarray]) -> List[np.ndarray]:
+    'Returns the contours that are convex'
+    return [contour for contour in contours if cv.isContourConvex(contour)]
+
 def contours_filter_solidity(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that have solidity larger than threshold'
     return [contour for contour in contours if cv.contourArea(contour)/cv.contourArea(cv.convexHull(contour)) > threshold]
 
+def distance(point1, point2):
+    return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
+
 def contours_filter_isolated_contours(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that are within (perimeter/4) distance from the center of mass of a another contour'
-    def __distance(point1, point2):
-     return np.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
     filtered_contours = []
     for i in range(len(contours)):
         for j in range(i+1, len(contours)):
@@ -29,11 +34,12 @@ def contours_filter_isolated_contours(contours: List[np.ndarray], threshold: flo
             M2 = cv.moments(contour2)
             center1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
             center2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
-            if __distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/4 + cv.arcLength(contour2, True)/4):
+            if distance(center1, center2) < threshold*(cv.arcLength(contour1, True)/4 + cv.arcLength(contour2, True)/4):
                 if not any(np.array_equal(contour1, contour) for contour in filtered_contours):
                     filtered_contours.append(contour1)
                 if not any(np.array_equal(contour2, contour) for contour in filtered_contours):
                     filtered_contours.append(contour2)
+
     return filtered_contours
 
 def approx_polygon_from_contour(contours: List[np.ndarray] , epsilon: float = vp.FEATURES_POLY_APPROX_DEFAULT_EPSILON) -> np.ndarray:
@@ -65,14 +71,16 @@ def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], ima
         cropped_images.append(cv.warpPerspective(image, matrix, (image_width, image_height)))
     return cropped_images
 
-def contour_basis_change(contour_center: Tuple[int,int], origin : Tuple[int,int], camera_matrix: np.ndarray, rotation_vector: np.ndarray, translation_vector: np.ndarray) -> Tuple[float, float]:
+def contour_to_world_coordinates(contour_center: Tuple[int,int], origin : Tuple[int,int], camera_matrix: np.ndarray, rotation_vector: np.ndarray, translation_vector: np.ndarray) -> Tuple[float, float]:
     '''Returns the contour in the basis of the rotation and translation vectors'''
-    obj_points = np.float32([[contour_center[0] / origin[0], contour_center[1] / origin[1], 0] ]).reshape(-1,3)
+    obj_points = np.float32([[contour_center[0], contour_center[1], 1] ]).reshape(-1,3)
     rotation_matrix, _ = cv.Rodrigues(rotation_vector)
     inverse_rotation_matrix = rotation_matrix.transpose()
-    # Convert the inverse rotation matrix back to a rotation vector
-    inverse_rotation_vector, _ = cv.Rodrigues(inverse_rotation_matrix)
-    relative_point, _ = cv.projectPoints(obj_points, inverse_rotation_vector, -translation_vector, camera_matrix, None)
+    # relative_point, _ = cv.projectPoints(obj_points, inverse_rotation_vector, -translation_vector, camera_matrix, None)
+    inverse_camera = np.linalg.inv(camera_matrix)
+    relative_point = inverse_camera @ obj_points.T
+    relative_point =  inverse_rotation_matrix @  (relative_point - translation_vector)
     relative_point = relative_point.squeeze()
+    relative_point = np.array([relative_point[0] / abs(relative_point[2])  , relative_point[1] - abs(relative_point[2])])
     assert relative_point.shape == (2,), "The relative point should have 2 dimensions"
-    return relative_point.astype(int)
+    return relative_point
