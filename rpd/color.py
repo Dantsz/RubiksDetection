@@ -19,12 +19,12 @@ class SquareColor(IntEnum):
 # LAB values for the standard rubik's cube colors
 # Scaled 0-255 because opencv
 reference_colors = np.array([
-    [127, 127], # white
-    [190, 165], # red
-    [80, 155], # green
-    [110, 185], # yellow
-    [200, 180], # orange
-    [127, 100], # blue
+    [190, 127, 127], # white
+    [90, 190, 165], # red
+    [190, 80, 155], # green
+    [190, 110, 185], # yellow
+    [160, 200, 180], # orange
+    [90, 127, 100], # blue
 ])
 
 def color_avg_lab(img: np.ndarray) -> Tuple[float, float, float]:

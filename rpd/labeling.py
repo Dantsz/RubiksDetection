@@ -58,7 +58,7 @@ def fit_colors_to_labels(labels: list[int], centers: np.ndarray) -> list[SquareC
     """Fits the labels to the closest color in the reference colors.
     """
     colors: list[SquareColor] = []
-    for center in centers[: , 1:]:
+    for center in centers[: , :]:
         min_distance = float('inf')
         color = SquareColor.Unknown
         for i, ref_color in enumerate(reference_colors) :
