@@ -106,10 +106,10 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
 
     columns: list[list[FaceSquare]] = __reorder_face(squares, lambda k: k.relative_position)
     # add orientation correction, that means rotate the face so that the top row in the image is the top row of the face
-    # if orientation_correction:
-    #     columns = correct_face_orientation(columns, squares)
-    #     if columns is None:
-    #         return None
+    if orientation_correction:
+        columns = correct_face_orientation(columns, squares)
+        if columns is None:
+            return None
 
     return Face(columns)
 
