@@ -189,7 +189,7 @@ class SolutionDisplayEngine:
     def display(self, frame: np.ndarray, face : metafeatures.Face, mirrored: bool) -> tuple[np.ndarray, DisplaySolutionResult]:
         if self.ready():
             return self.__display_solution(frame, face, mirrored)
-        elif self.display_errors:
+        elif self.display_errors or (not self.ready()):
             return self.__display_error(frame, face, mirrored)
         return frame, DisplaySolutionResult.NOT_READY
 
