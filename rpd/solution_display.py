@@ -7,6 +7,7 @@ import cv2 as cv
 
 from RubiksDetection.rpd.color import SquareColor, move_code_to_face
 from RubiksDetection.rpd.cube_state import CubeState
+from RubiksDetection.rpd.solve import Move
 from . import metafeatures
 
 class DisplaySolutionResult(Enum):
@@ -42,7 +43,7 @@ class SolutionDisplayEngine:
         self.on_solution_start = empty
         self.on_solution_done = empty
 
-    def consume_solution(self, detected_centers, state: CubeState, solving_moves: list[str]):
+    def consume_solution(self, detected_centers, state: CubeState, solving_moves: list[Move]):
         self.on_initialize()
         self.centers = detected_centers
         self.solving_moves = solving_moves
@@ -52,27 +53,13 @@ class SolutionDisplayEngine:
     def ready(self):
         return self.centers is not None and self.solving_moves is not None
 
-    def __move_str_to_face_and_direction(self, move: str) -> tuple[SquareColor, int]:
-        """Return the face and direction of the move.
-
-        The direction is 1 for clockwise and -1 for counterclockwise and 2 for 180 degrees.
-        """
-        assert len(move) <= 2, f"Invalid move {move}"
-        color = move_code_to_face(move[0])
-        if len(move) == 1:
-            return color, 1
-        if move[1] == "'":
-            return color, -1
-        if move[1] == "2":
-            return color, 2
-
     def __valid_target_face(self, target_face: SquareColor, current_state: CubeState, expected_state: CubeState) -> bool:
         """If after the move the target face is the same it cannot be a target face"""
         return not np.array_equal(current_state.get_face(target_face), expected_state.get_face(target_face))
 
-    def __get_move_display_target_face(self, move: str, current_state: CubeState, expected_state: CubeState) -> tuple[SquareColor, SolutionDisplayRelativeLocation]:
+    def __get_move_display_target_face(self, move: Move, current_state: CubeState, expected_state: CubeState) -> tuple[SquareColor, SolutionDisplayRelativeLocation]:
         """Return the face the move should be displayed on."""
-        color, _ = self.__move_str_to_face_and_direction(move)
+        color, _ = move
         match color:
             case SquareColor.WHITE:
                 if not self.__valid_target_face(SquareColor.GREEN, current_state, expected_state):
@@ -119,9 +106,9 @@ class SolutionDisplayEngine:
                 classified_face[i, j] = color
         return classified_face
 
-    def __get_expected_state_after_move(self, move: str) -> CubeState:
+    def __get_expected_state_after_move(self, move: Move) -> CubeState:
         expected_state = copy.deepcopy(self.cube_state)
-        moved_face, direction = self.__move_str_to_face_and_direction(move)
+        moved_face, direction = move
         match direction:
             case 1:
                 expected_state.rotate_clockwise_once(moved_face)
@@ -142,7 +129,7 @@ class SolutionDisplayEngine:
 
     def draw_move(self, frame: np.ndarray, move: str, face: metafeatures.Face, location: SolutionDisplayRelativeLocation, mirrored: bool) -> np.ndarray:
         """Draws the move on the face."""
-        _, direction = self.__move_str_to_face_and_direction(move)
+        _, direction = move
         start, end = None, None
         match location:
             case SolutionDisplayRelativeLocation.LEFT:
