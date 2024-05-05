@@ -64,7 +64,7 @@ class PreProcessingData:
 
     centers_of_mass: List[Tuple[int, int] | None]
     areas: List[float | None]
-    orientation: List[Tuple[np.ndarray, np.ndarray, np.ndarray] | None]
+    orientation: List[Tuple[np.ndarray, np.ndarray] | None]
 
     def __init__(self, contours: List[np.ndarray]):
         """Build data from detected contours."""
@@ -107,13 +107,13 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
     columns: list[list[FaceSquare]] = __reorder_face(squares, lambda k: k.relative_position)
     # add orientation correction, that means rotate the face so that the top row in the image is the top row of the face
     if orientation_correction:
-        columns = correct_face_orientation(columns, squares)
+        columns = __correct_face_orientation(columns, squares)
         if columns is None:
             return None
 
     return Face(columns)
 
-def check_face_integrity(face: Face, center_index) -> bool:
+def __check_face_integrity(face: Face, center_index) -> bool:
     # TODO: MAKE RETURN FALSE INSTEAD OF ASSERT
     # assert (face[1][1].id == center_index), f"The center square is not in the center, something went wrong!, got : {face[1][1].id} expected {center_index}"
     if (face[1][1].id != center_index):
@@ -178,14 +178,14 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
             columns = assemble_face_data(frame, contours, contours_data, ids, relative_positions, orientation_correction)
             if columns is None:
                 continue
-            if not check_face_integrity(columns, i):
+            if not __check_face_integrity(columns, i):
                 continue
             # Could also skip
             return columns
         pass
     return None
 
-def correct_face_orientation(arrangement: list[list[FaceSquare]], squares: list[Face]) -> list[list[Face]] | None:
+def __correct_face_orientation(arrangement: list[list[FaceSquare]], squares: list[Face]) -> list[list[Face]] | None:
     """Rotate the face so that the top row in the image is the top row of the face."""
     # Reconstruct the face as it appears in the image
     image_orientation = __reorder_face(squares, lambda k: k.center)
