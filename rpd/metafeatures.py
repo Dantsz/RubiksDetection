@@ -185,14 +185,13 @@ def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool 
         pass
     return None
 
-def correct_face_orientation(arrangement: list[list[Face]], squares: list[Face]) -> list[list[Face]] | None:
+def correct_face_orientation(arrangement: list[list[FaceSquare]], squares: list[Face]) -> list[list[Face]] | None:
     """Rotate the face so that the top row in the image is the top row of the face."""
     # Reconstruct the face as it appears in the image
     image_orientation = __reorder_face(squares, lambda k: k.center)
-
     # Rotate until they have the same first column
     for i in range(4):
-        test_columns = np.rot90(arrangement, i)
+        test_columns: list[list[FaceSquare]] = np.rot90(arrangement, i)
         if test_columns[0][0].id != image_orientation[0][0].id:
             continue
         if test_columns[0][1].id != image_orientation[0][1].id:
