@@ -1,3 +1,4 @@
+from enum import IntEnum
 import numpy as np
 from . import cube_state
 from . import color
@@ -10,7 +11,12 @@ def solve(state: cube_state.CubeState) -> list[str]:
     solve_steps = [ color.spatial_symbol_to_color(move).name[0] + move[1:] for move in solve_str.split(" ")]
     return solve_steps
 
-Move: TypeAlias = tuple[color.SquareColor, int]
+class MoveDirection(IntEnum):
+    CLOCKWISE = 1
+    COUNTERCLOCKWISE = -1
+    DOUBLE = 2
+
+Move: TypeAlias = tuple[color.SquareColor, MoveDirection]
 
 def solve_but_better(state: cube_state.CubeState) -> list[Move]:
     """Solves the state of the cube using the Kociemba solver."""

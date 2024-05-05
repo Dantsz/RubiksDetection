@@ -5,6 +5,7 @@ import copy
 
 import cv2 as cv
 
+from RubiksDetection.rpd import solve
 from RubiksDetection.rpd.color import SquareColor, move_code_to_face
 from RubiksDetection.rpd.cube_state import CubeState
 from RubiksDetection.rpd.solve import Move
@@ -110,11 +111,11 @@ class SolutionDisplayEngine:
         expected_state = copy.deepcopy(self.cube_state)
         moved_face, direction = move
         match direction:
-            case 1:
+            case solve.MoveDirection.CLOCKWISE:
                 expected_state.rotate_clockwise_once(moved_face)
-            case -1:
+            case solve.MoveDirection.COUNTERCLOCKWISE:
                 expected_state.rotate_counter_clockwise_once(moved_face)
-            case 2:
+            case solve.MoveDirection.DOUBLE:
                 expected_state.rotate_twice(moved_face)
         return expected_state
 
