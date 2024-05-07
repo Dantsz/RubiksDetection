@@ -75,22 +75,3 @@ def spatial_symbol_to_color(move_str: str) -> SquareColor:
         return SquareColor.ORANGE
     else:
         return SquareColor.Unknown
-
-def  move_code_to_face(move: str) -> SquareColor:
-    """Perform a move on a face."""
-    assert len(move) == 1, f"Invalid move {move}"
-    match move:
-        case 'W':
-            return SquareColor.WHITE
-        case 'R':
-            return SquareColor.RED
-        case 'G':
-            return SquareColor.GREEN
-        case 'Y':
-            return SquareColor.YELLOW
-        case 'O':
-            return SquareColor.ORANGE
-        case 'B':
-            return SquareColor.BLUE
-        case _:
-            raise ValueError(f"Invalid move {move}")

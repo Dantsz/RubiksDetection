@@ -6,7 +6,7 @@ import copy
 import cv2 as cv
 
 from RubiksDetection.rpd import solve
-from RubiksDetection.rpd.color import SquareColor, move_code_to_face
+from RubiksDetection.rpd.color import SquareColor
 from RubiksDetection.rpd.cube_state import CubeState
 from RubiksDetection.rpd.solve import Move
 from . import metafeatures
