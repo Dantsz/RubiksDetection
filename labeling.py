@@ -1,6 +1,6 @@
 from enum import Enum
 
-from RubiksDetection.rpd import cube_state
+from RubiksDetection import cube_state
 
 from . import metafeatures
 

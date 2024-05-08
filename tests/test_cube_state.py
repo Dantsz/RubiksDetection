@@ -1,4 +1,4 @@
-import rpd.cube_state as cube_state
+import RubiksDetection.cube_state as cube_state
 import numpy as np
 
 SOLVED_STATE_ARRAY = np.array([
