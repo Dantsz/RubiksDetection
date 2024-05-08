@@ -23,7 +23,7 @@ def check_label_consistency(labels: np.ndarray) -> bool:
             return False
     return True
 
-def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
+def __classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
     """Classifies the squares of the cube state using k-means clustering.
 
     The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
@@ -36,7 +36,7 @@ def classify_squares_k_means(squares: list[metafeatures.FaceSquare], centers: li
 
     return labels, centers
 
-def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
+def __classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
     """Classifies the squares of the cube state using the closest center to each square.
 
     The squares parameter is a list of average LAB values for each square in the cube, the centers parameter represents the square at index (1,1) of each face.
@@ -53,6 +53,12 @@ def classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: li
                 label = i
         labels.append([label])
     return np.array(labels), centers
+
+def classify(method: int, squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
+    if method == 0:
+        return __classify_squares_closest(squares, centers)
+    elif method == 1:
+        return __classify_squares_k_means(squares, centers)
 
 def fit_colors_to_labels(labels: list[int], centers: np.ndarray) -> list[SquareColor]:
     """Fits the labels to the closest color in the reference colors.
@@ -81,6 +87,7 @@ class LabelingEngine:
         self.last_centers = []
         self.colors: list[SquareColor] = []
         self.center_labels: list[int] = []
+        self.clusteting_method = 0
         pass
 
     def consume_face(self, face: metafeatures.Face):
@@ -113,7 +120,7 @@ class LabelingEngine:
         assert all_squares_avg_lab.shape[0] == 54, f"something went wrong finding the squares, got {all_squares_avg_lab.shape[0]} expected 54"
         assert center_squares_avg_lab.shape[0] == 6, f"something went wrong finding the center squares, got {center_squares_avg_lab.shape[0]} expected 6"
 
-        labels, centers = classify_squares_closest(all_squares_avg_lab, center_squares_avg_lab)
+        labels, centers = classify(self.clusteting_method, all_squares_avg_lab, center_squares_avg_lab)
 
         if check_label_consistency(labels):
             logging.info("The labels are consistent")
