@@ -122,12 +122,6 @@ class LabelingEngine:
 
         labels, centers = classify(self.clusteting_method, all_squares_avg_lab, center_squares_avg_lab)
 
-        if check_label_consistency(labels):
-            logging.info("The labels are consistent")
-        else:
-            logging.warning("The labels are not consistent")
-            raise ValueError("The labels are not consistent")
-
         self.last_centers = centers
         self.colors = fit_colors_to_labels(labels, self.last_centers)
         self.color_centers = list(range(6))
@@ -143,6 +137,12 @@ class LabelingEngine:
                     self.face_labels[x][i].append(self.colors[labels[index][0]])
                     if i == 1 and j == 1:
                         self.center_labels.append(self.colors[labels[index][0]])
+
+        if check_label_consistency(labels):
+            logging.info("The labels are consistent")
+        else:
+            logging.warning("The labels are not consistent")
+            raise ValueError("The labels are not consistent")
 
 
     def state(self) -> cube_state.CubeState:
@@ -215,6 +215,8 @@ class LabelingEngine:
         avg_points = []
         colors = []
         for idx, face in enumerate(self.face_data):
+            if idx >= len(self.face_labels):
+                break
             for i, col in enumerate(face):
                 for j, square in enumerate(col):
                     color_met = square.avg_lab
