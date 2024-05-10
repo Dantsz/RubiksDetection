@@ -73,13 +73,14 @@ def contours_crop_and_reverse_perspective(image, contours: List[np.ndarray], ima
 
 def contour_center_to_world_coordinates(contour_center: Tuple[int,int], camera_matrix: np.ndarray, rotation_vector: np.ndarray, translation_vector: np.ndarray) -> Tuple[float, float]:
     '''Returns the contour in the basis of the rotation and translation vectors'''
-    obj_points = np.float32([[contour_center[0], contour_center[1], 0] ]).reshape(-1,3)
+    obj_points = np.float32([[contour_center[0], contour_center[1], 1] ]).reshape(-1,3)
     rotation_matrix, _ = cv.Rodrigues(rotation_vector)
     inverse_rotation_matrix = rotation_matrix.transpose()
     # relative_point, _ = cv.projectPoints(obj_points, inverse_rotation_vector, -translation_vector, camera_matrix, None)
     inverse_camera = np.linalg.inv(camera_matrix)
-    relative_point = inverse_camera @ obj_points.T
-    relative_point =  inverse_rotation_matrix @  (relative_point - translation_vector)
+    l = (inverse_rotation_matrix @ translation_vector)[2][0] / (inverse_rotation_matrix @ inverse_camera @ obj_points.T)[2][0]
+
+    relative_point = inverse_rotation_matrix @ (l * inverse_camera @ obj_points.T - translation_vector)
     relative_point = relative_point.squeeze()
     relative_point = np.array([relative_point[0]  , relative_point[1] ])
     assert relative_point.shape == (2,), "The relative point should have 2 dimensions"
