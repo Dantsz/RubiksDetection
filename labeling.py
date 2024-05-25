@@ -1,4 +1,5 @@
 from enum import Enum
+import time
 
 from RubiksDetection import cube_state
 
@@ -88,6 +89,7 @@ class LabelingEngine:
         self.colors: list[SquareColor] = []
         self.center_labels: list[int] = []
         self.clusteting_method = 0
+        self.last_fit_duration = None
         pass
 
     def consume_face(self, face: metafeatures.Face):
@@ -104,6 +106,7 @@ class LabelingEngine:
 
     def fit(self):
         """Identifies the colors of the faces and rotates the faces to make a valid cube."""
+        start = time.time()
         if not self.is_complete():
             raise ValueError("The cube is not complete")
         all_squares_avg_lab: list[tuple[float, float, float]] = []
@@ -139,10 +142,13 @@ class LabelingEngine:
                         self.center_labels.append(self.colors[labels[index][0]])
 
         if check_label_consistency(labels):
-            logging.info("The labels are consistent")
+            logging.info("Labeling: The labels are consistent")
         else:
             logging.warning("The labels are not consistent")
             raise ValueError("The labels are not consistent")
+        end = time.time()
+        self.last_fit_duration = end - start
+        logging.info(f"Labeling: Fit duration is {self.last_fit_duration}")
 
 
     def state(self) -> cube_state.CubeState:
@@ -158,7 +164,7 @@ class LabelingEngine:
 
     def debug_image_2d(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""
-        logging.info("Creating debug image")
+        logging.info(f"Labeling: Creating 2d debug image")
         plt.clf()
         # Createa a black image
         img = np.zeros((dimensions[1], dimensions[0], 3), np.uint8)
@@ -208,7 +214,7 @@ class LabelingEngine:
 
     def debug_image_3d(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""
-        logging.info("Creating debug image")
+        logging.info("Labeling: Creating 3d debug image")
         # Createa a black image
         img = np.zeros((dimensions[1], dimensions[0], 3), np.uint8)
         # Draw the faces
@@ -266,3 +272,4 @@ class LabelingEngine:
         self.face_data = []
         self.face_labels = []
         self.last_centers = []
+        self.last_fit_duration = None

@@ -3,6 +3,7 @@ import json
 import logging
 import math
 import pickle
+import time
 import numpy as np
 import cv2 as cv
 
@@ -18,9 +19,11 @@ class DetectionEngine:
         self.last_face = None
         self._face_in_last_frame = False
         self.orientation_correction = True
+        self.last_process_frame_duration = None
         pass
 
     def process_frame(self, frame: np.ndarray):
+        start = time.time()
         img = frame
         assert frame is not None, "frame is None"
         assert frame.shape[0] == viewport_properties.HEIGHT, f"{frame.shape[0]} != {viewport_properties.HEIGHT}"
@@ -42,6 +45,8 @@ class DetectionEngine:
             self._face_in_last_frame = True
         else:
             self._face_in_last_frame = False
+        end = time.time()
+        self.last_process_frame_duration = end - start
 
 
     def last_frame_detected_face(self) -> bool:
