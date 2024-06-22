@@ -21,10 +21,10 @@ class SquareColor(IntEnum):
 reference_colors = np.array([
     [190, 127, 127], # white
     [90, 190, 165], # red
-    [190, 80, 155], # green
+    [125, 80, 155], # green
     [190, 110, 185], # yellow
     [160, 200, 180], # orange
-    [90, 127, 100], # blue
+    [70, 127, 100], # blue
 ])
 
 def color_avg_lab(img: np.ndarray) -> Tuple[float, float, float]:
