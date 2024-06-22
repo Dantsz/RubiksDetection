@@ -174,8 +174,10 @@ class SolutionDisplayEngine:
         text = f"Change face to: {target_face.name}"
         return self.__draw_text_above_face(frame, face, text, font_color = (0, 255, 0), mirrored=mirrored)
 
-    def display(self, frame: np.ndarray, face : metafeatures.Face, mirrored: bool) -> tuple[np.ndarray, DisplaySolutionResult]:
+    def display(self, frame: np.ndarray, face : metafeatures.Face, mirrored: bool, draw_miniature: bool = True) -> tuple[np.ndarray, DisplaySolutionResult]:
         if self.ready():
+            if draw_miniature:
+                frame = self.__display_miniature_detected_colors(frame, face)
             return self.__display_solution(frame, face, mirrored)
         elif self.display_errors:
             return self.__display_error(frame, face, mirrored)
@@ -229,3 +231,13 @@ class SolutionDisplayEngine:
             #If the face is correct draw the move
             #Detect if the face changed as it should have
             #Take the first move and combine it with the face to draw the move
+
+    def __display_miniature_detected_colors(self, frame: np.ndarray, face: metafeatures.Face) -> np.ndarray:
+        labels = self.__classify_face_squares(face)
+        for i, col in enumerate(face):
+            for j, square in enumerate(col):
+                text = SquareColor(labels[i][j]).name[0]
+                text_size = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+                rectangle_pos = (i * 25 + text_size[0]//2, j * 25 + text_size[1])
+                frame = cv.putText(frame, text, rectangle_pos, cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1, cv.LINE_AA)
+        return frame
