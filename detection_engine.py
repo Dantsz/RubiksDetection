@@ -31,6 +31,7 @@ class DetectionEngine:
         assert frame.shape[2] == 3, f"{frame.shape[2]} != 3, the image must be in BGR format"
         frame = filtering.amax_adaptive_filter(frame)
         contours, hierarchy = cv.findContours(frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        contours = features.contours_filter_aspect_ratio(contours, 0.75)
         contours = features.contours_filter_small_area(contours, viewport_properties.FEATURES_FILTER_MIN_AREA)
         contours = features.contours_filter_large(contours, viewport_properties.FEATURES_FILTER_MAX_AREA)
         contours = features.contours_filter_solidity(contours, viewport_properties.FEATURES_FILTER_SOLIDITY)

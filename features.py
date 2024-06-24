@@ -4,6 +4,12 @@ import numpy as np
 from . import viewport_properties as vp
 from typing import List, Tuple
 
+def contours_filter_aspect_ratio(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
+    def aspect_ratio(contour: np.ndarray) -> float:
+        _,_,width, height = cv.boundingRect(contour)
+        return float(min(width,height)) / float(max(width,height))
+    return [contour for contour in contours if aspect_ratio(contour) > threshold]
+
 def contours_filter_small_area(contours: List[np.ndarray], threshold: float) -> List[np.ndarray]:
     'Returns the contours that are larger than threshold'
     return [contour for contour in contours if cv.contourArea(contour) > threshold]
