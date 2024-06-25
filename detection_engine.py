@@ -20,7 +20,6 @@ class DetectionEngine:
         self._face_in_last_frame = False
         self.orientation_correction = True
         self.last_process_frame_duration = None
-        pass
 
     def process_frame(self, frame: np.ndarray):
         start = time.time()

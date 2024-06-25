@@ -114,11 +114,8 @@ def assemble_face_data(frame, contours: List[np.ndarray], contours_data : PrePro
     return Face(columns)
 
 def __check_face_integrity(face: Face, center_index) -> bool:
-    # TODO: MAKE RETURN FALSE INSTEAD OF ASSERT
-    # assert (face[1][1].id == center_index), f"The center square is not in the center, something went wrong!, got : {face[1][1].id} expected {center_index}"
     if (face[1][1].id != center_index):
         return False
-    # CHECKS for the angles between the face cross
     def cos_angle(vec_1, vec_2):
         return np.dot(vec_1, vec_2)/(np.linalg.norm(vec_1) * np.linalg.norm(vec_2))
     point_up = np.array(face[0][1].center)
@@ -137,11 +134,8 @@ def __check_face_integrity(face: Face, center_index) -> bool:
     cos_angles = [cos_angle_up_left, cos_angle_up_right, cos_angle_down_left, cos_angle_down_right]
     ANGLE_BOUNDS = (-0.4, 0.4)
     for idx, cos_angle in enumerate(cos_angles):
-        # TODO: ALSO MAKE return false
-        # assert cos_angle > ANGLE_BOUNDS[0] and cos_angle < ANGLE_BOUNDS[1], f"The angle {idx} is not between 66 and 113 degrees, angle: {math.degrees(math.acos(cos_angle))}"
         if not (cos_angle > ANGLE_BOUNDS[0] and cos_angle < ANGLE_BOUNDS[1]):
             return False
-    # TODO: Add other checks for cube face
     return True
 
 def detect_face(frame, contours: List[np.ndarray], orientation_correction: bool = True) -> Face | None:
