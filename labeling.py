@@ -55,6 +55,10 @@ def __classify_squares_closest(squares: list[metafeatures.FaceSquare], centers: 
         labels.append([label])
     return np.array(labels), centers
 
+
+def __classify_squares_closest_two_pass(squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
+    pass
+
 def classify(method: int, squares: list[metafeatures.FaceSquare], centers: list[tuple[float, float, float]]) -> tuple[np.ndarray, np.ndarray]:
     if method == 0:
         return __classify_squares_closest(squares, centers)
