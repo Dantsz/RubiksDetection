@@ -21,7 +21,4 @@ def amax_adaptive_filter(img, gaussian_blur_kerner: int = vp.FILTER_GAUSSIAN_DEF
     thresh = cv.morphologyEx(thresh, cv.MORPH_OPEN, kernel)
     thresh = cv.erode(thresh, np.ones((vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE, vp.FILTER_MORPHOLOGICAL_DEFAULT_KSIZE), np.uint8), iterations=1)
     return thresh
-    # This shouldn't be necessary
-    # thresh = cv.GaussianBlur(thresh, (gaussian_blur_kerner, gaussian_blur_kerner), 0)
-    # edges = cv.Canny(thresh, vp.FILTER_CANNY_THRESHOLD_1, vp.FILTER_CANNY_THRESHOLD_2)
-    # return edges
+
