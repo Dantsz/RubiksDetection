@@ -1,8 +1,5 @@
-from enum import Enum
 import cv2 as cv
 import numpy as np
-import math
-import json
 
 from dataclasses import asdict, dataclass
 from typing import Callable, List, Tuple, Union

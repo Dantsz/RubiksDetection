@@ -1,4 +1,3 @@
-
 from typing import Self
 import numpy as np
 from .color import SquareColor, color_to_spatial_symbol

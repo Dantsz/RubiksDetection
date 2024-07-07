@@ -1,5 +1,4 @@
 from enum import IntEnum
-import numpy as np
 from . import cube_state
 from . import color
 import kociemba
