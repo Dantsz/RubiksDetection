@@ -20,6 +20,7 @@ def solve(state: cube_state.CubeState) -> list[Move]:
             return -1
         if direction == "2":
             return 2
+        raise ValueError(f"Invalid modifier {direction} on move")
     solve_str = kociemba.solve(state.to_solver_string())
     solve_steps = [ (color.spatial_symbol_to_color(move[0]), __direction_str_to_int(move[1:])) for move in solve_str.split(" ")]
     return solve_steps
