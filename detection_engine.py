@@ -82,7 +82,6 @@ class DetectionEngine:
             if M["m00"] == 0:
                 continue
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-            # Use an estimated fov of 65 degrees
             fov = (viewport_properties.ORIENTATION_ESTIMATED_FOV_W, viewport_properties.ORIENTATION_ESTIMATED_FOV_H)
             camera_matrix = orientation.build_camera_matrix(fov, viewport_properties.WIDTH, viewport_properties.HEIGHT)
             (rotation_vector, translation_vector) = orientation.estimate_rectangle_contour_pose(contour, camera_matrix)

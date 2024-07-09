@@ -170,9 +170,7 @@ class LabelingEngine:
         """Returns an image with the debug information of the state of the cube."""
         logging.info(f"Labeling: Creating 2d debug image")
         plt.clf()
-        # Createa a black image
         img = np.zeros((dimensions[1], dimensions[0], 3), np.uint8)
-        # Draw the faces
         avg_points = []
         colors = []
         for idx, face in enumerate(self.face_data):
@@ -219,9 +217,7 @@ class LabelingEngine:
     def debug_image_3d(self, dimensions: tuple[int, int] = (800, 100)):
         """Returns an image with the debug information of the state of the cube."""
         logging.info("Labeling: Creating 3d debug image")
-        # Createa a black image
         img = np.zeros((dimensions[1], dimensions[0], 3), np.uint8)
-        # Draw the faces
         avg_points = []
         colors = []
         for idx, face in enumerate(self.face_data):
