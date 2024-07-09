@@ -69,7 +69,6 @@ class CubeState:
         self.state[int(face)] = np.rot90(self.state[int(face)], 1)
         match face:
             case SquareColor.WHITE:
-                # Rotate the adjacent faces
                 row_f_1 = self.get_face_line(1, 0, None).copy()
                 row_f_2 = self.get_face_line(2, 0, None).copy()
                 row_f_4 = self.get_face_line(4, 0, None).copy()
@@ -79,7 +78,6 @@ class CubeState:
                 self.__set_face_line(4, 0, None, row_f_2)
                 self.__set_face_line(5, 0, None, row_f_4)
             case SquareColor.RED:
-                # Rotate the adjacent faces
                 col_f_0 = self.get_face_line(0, None, 2, True).copy()
                 col_f_2 = self.get_face_line(2, None, 2).copy()
                 col_f_3 = self.get_face_line(3, None, 2).copy()
@@ -89,7 +87,6 @@ class CubeState:
                 self.__set_face_line(3, None, 2, col_f_5)
                 self.__set_face_line(5, None, 0, col_f_0)
             case SquareColor.GREEN:
-                # Rotate the adjacent faces
                 row_f_0 = self.get_face_line(0, 2, None).copy()
                 col_f_1 = self.get_face_line(1, None, 0, True).copy()
                 row_f_3 = self.get_face_line(3, 0, None).copy()
@@ -99,7 +96,6 @@ class CubeState:
                 self.__set_face_line(3, 0, None, col_f_1)
                 self.__set_face_line(4, None, 2, row_f_3)
             case SquareColor.YELLOW:
-                # Rotate the adjacent faces
                 row_f_1 = self.get_face_line(1, 2, None).copy()
                 row_f_2 = self.get_face_line(2, 2, None).copy()
                 row_f_4 = self.get_face_line(4, 2, None).copy()
@@ -109,7 +105,6 @@ class CubeState:
                 self.__set_face_line(4, 2, None, row_f_5)
                 self.__set_face_line(5, 2, None, row_f_1)
             case SquareColor.ORANGE:
-                # Rotate the adjacent faces
                 col_f_0 = self.get_face_line(0, None, 0).copy()
                 col_f_2 = self.get_face_line(2, None, 0).copy()
                 col_f_3 = self.get_face_line(3, None, 0, True).copy()
@@ -119,7 +114,6 @@ class CubeState:
                 self.__set_face_line(3, None, 0, col_f_2)
                 self.__set_face_line(5, None, 2, col_f_3)
             case SquareColor.BLUE:
-                # Rotate the adjacent faces
                 row_f_0 = self.get_face_line(0, 0, None, True).copy()
                 col_f_1 = self.get_face_line(1, None, 2).copy()
                 row_f_3 = self.get_face_line(3, 2, None, True).copy()
